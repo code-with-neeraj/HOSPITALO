@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+:root {
+ --bg-primary: #5f6FFF;
+}
+
+.active hr{
+    @apply block 
+}
