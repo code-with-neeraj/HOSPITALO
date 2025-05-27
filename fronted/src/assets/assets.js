@@ -296,4 +296,46 @@ export const doctors = [
             line2: 'Circle, Ring Road, London'
         }
     },
+    {
+        _id: 'doc16',
+        name: 'Dr. Olivia Turner',
+        image: doc1,
+        speciality: 'Gastroenterologist',
+        degree: 'MBBS',
+        experience: '5 Years',
+        about: 'Dr. Turner specializes in digestive system disorders and is dedicated to providing patient-centered care with a focus on accurate diagnosis and effective treatment.',
+        fees: 70,
+        address: {
+            line1: '67th Cross, Richmond',
+            line2: 'Circle, Ring Road, London'
+        }
+    },
+    {
+        _id: 'doc17',
+        name: 'Dr. Ethan Carter',
+        image: doc2,
+        speciality: 'Gastroenterologist',
+        degree: 'MBBS',
+        experience: '6 Years',
+        about: 'Dr. Carter is experienced in managing a wide range of gastrointestinal conditions and is committed to improving patient outcomes through evidence-based medicine.',
+        fees: 75,
+        address: {
+            line1: '77th Cross, Richmond',
+            line2: 'Circle, Ring Road, London'
+        }
+    },
+    {
+        _id: 'doc18',
+        name: 'Dr. Mia Robinson',
+        image: doc3,
+        speciality: 'Gastroenterologist',
+        degree: 'MBBS',
+        experience: '4 Years',
+        about: 'Dr. Robinson provides comprehensive care for digestive health and emphasizes preventive strategies and patient education.',
+        fees: 65,
+        address: {
+            line1: '87th Cross, Richmond',
+            line2: 'Circle, Ring Road, London'
+        }
+    }
 ]
