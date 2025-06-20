@@ -7,11 +7,8 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   theme: {
     extend:{
-      colors:{
-        'primary': "#5f6FFF",
-      },
-        gridTemplateColumns: {
-        'auto': 'repeat(auto-fill, minmax(200px, 1fr))', // Responsive grid columns
+     colors: {
+       'primary': '#5f6FFF', // Example primary color
       },
     },
   },
@@ -19,5 +16,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  server:{port:5173}
+  server:{port:5174}
 })
