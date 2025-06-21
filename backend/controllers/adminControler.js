@@ -33,23 +33,22 @@ const addDoctor = async (req, res) => {
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        // image ke chalte error aa raha hai api request vejne me baad me uncoment karna hai
 
-        //  if (!imageFile) {
-        //     return res.json({ success: false, message: "Image file is required" });
-        // }
+         if (!imageFile) {
+            return res.json({ success: false, message: "Image file is required" });
+        }
 
         // upload image to cloudinary
 
-        // const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" })
-        // const imageUrl = imageUpload.secure_url
+        const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" })
+        const imageUrl = imageUpload.secure_url
 
        
 
         const doctorData = {
             name,
             email,
-            // image: imageUrl,
+            image: imageUrl,
             password: hashedPassword,
             speciality,
             degree,

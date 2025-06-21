@@ -17,4 +17,3 @@ const userModel = mongoose.models.user || mongoose.model('user', userSchema)
 
 export default userModel
 
-// 5:11:2
