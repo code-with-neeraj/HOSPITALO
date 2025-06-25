@@ -2,6 +2,7 @@ import doctorModel from "../models/doctorModel.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import appointmentModel from "../models/appointmentModel.js";
+import e from "express";
 
 
 const changeAvailablity = async (req, res) => {
@@ -127,4 +128,45 @@ const appointmentCancel = async (req, res) => {
     }
 }
 
-export {changeAvailablity,doctorList, loginDoctor, appointmentsDoctor, appointmentComplete, appointmentCancel}
+// API to get dashboard data for doctor panel
+const doctorDashboard = async (req, res) => {
+    try {
+
+        const  { docId } = req.body
+
+        const appointments = await appointmentModel.find({ docId })
+
+        let earnings = 0
+
+        appointments.map((item)=>{
+            if (item.isCompleted || item.payment) {
+                earnings += item.amount
+            }
+        })
+
+        let patients = []
+
+        appointments.map((item)=>{
+            if (!patients.includes(item.userId)) {
+                patients.push(item.userId)
+            }
+        })
+
+        const dashData = {
+            earnings,
+            appointments: appointments.length,
+            patients: patients.length,
+            latestAppointments: appointments.reverse().slice(0, 5)
+        }
+
+        res.json({ success: true, dashData })
+
+     
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message })
+    }
+}
+
+
+export {changeAvailablity,doctorList, loginDoctor, appointmentsDoctor, appointmentComplete, appointmentCancel, doctorDashboard}
