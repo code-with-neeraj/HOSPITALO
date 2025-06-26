@@ -12,8 +12,8 @@ const Footer = () => {
         
         {/* ----- Left Section ----- */}
         <div>
-          <img className="mb-5 w-40" src={assets.logo} alt="" />
-          <p className="w-full md:w-2/3 text-gray-600 leading-6">            Prescripto is your trusted platform for managing prescriptions and healthcare needs online. We aim to simplify the process of connecting patients, doctors, and pharmacies, ensuring a seamless and secure experience for all users.</p>
+          <img className="mb-5 w-40" src={assets.logon} alt="" />
+          <p className="w-full md:w-2/3 text-gray-600 leading-6">Hospitalo is your trusted platform for managing prescriptions and healthcare needs online. We aim to simplify the process of connecting patients, doctors, and pharmacies, ensuring a seamless and secure experience for all users.</p>
         </div>
 
 

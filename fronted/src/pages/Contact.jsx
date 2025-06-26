@@ -17,7 +17,7 @@ const Contact = () => {
           <p className='font-semibold text-lg text-gray-600'>Our OFFICE</p>
           <p className='text-gray-500'>44 Chhapra Station <br /> 841301, Chapra, INDIA</p>
           <p className='text-gray-500'>Tel: 7277959834 <br /> Email: neerajkr145518@gmail.com</p>
-          <p className='font-semibold text-lg text-gray-600'>Careers at PRESCRIPTO</p>
+          <p className='font-semibold text-lg text-gray-600'>Careers at prescripto</p>
           <p className='text-gray-500'>Learn more about our teams and job openings.</p>
           <button className='border border-black px-8 py-4 text-sm hover:bg-black hover:text-white transition-all duration-500'>Explore Jobs</button>
         </div>

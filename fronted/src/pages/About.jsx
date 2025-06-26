@@ -14,22 +14,22 @@ const About = () => {
         <img className="w-full md:max-w-[360px]" src={assets.about_image} alt="" />
         <div className="flex flex-col justify-center gap-6 md:w-2/4 text-sm text-gray-600">
           <p>
-            Welcome To Prescripto, Your Trusted Partner In Managing Your
-            Healthcare Needs Conveniently And Efficiently Af Prescripto, We
+            Welcome To prescripto, Your Trusted Partner In Managing Your
+            Healthcare Needs Conveniently And Efficiently Af prescripto, We
             Understand The Challenges Individuals Face When It Comes To
             Scheduling Doctor Appointments And Managing Their Health Records.
           </p>
           <p>
-            Prescripto is Committed To Excellence in Healthcare Technology. We
+            prescripto is Committed To Excellence in Healthcare Technology. We
             Continuously Strive To Enhance Our Platform, Integrating The Latest
             Advancements To Improve User Experience And Deliver Superior
             Service. Whether You're Booking Your First Appointment Or Managing
-            Ongoing Care, Prescripto Is Here To Support You Every Step Of The
+            Ongoing Care, prescripto Is Here To Support You Every Step Of The
             Way.
           </p>
           <b className="text-gray-800">Our Vision</b>
           <p>
-            Our Vision At Prescripto is To Create A Seamless Healthcare
+            Our Vision At prescripto is To Create A Seamless Healthcare
             Experience For Every User. We Aim To Bridge The Gap Between Patients
             And Healthcare Providers, Making It Easier For You To Access The
             Care You Need. When You Need It
