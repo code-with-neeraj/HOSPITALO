@@ -41,17 +41,17 @@ const Navbar = () => {
       <div className='flex items-center gap-4 '>
         {
           token && userData
-            ? <div className='flex items-center gap-2 cursor-pointer group relative'>
-              <img className='w-8 rounded-full' src={userData.image} alt="" />
+            ? <button className='flex items-center gap-2 cursor-pointer group relative '>
+              <img className='w-8 rounded-full ' src={userData.image} alt="" />
               <img className='w-2.5' src={assets.dropdown_icon} alt="" />
               <div className='absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-20 hidden group-hover:block'>
-                <div className='min-w-48 bg-gray-50 rounded flex flex-col gap-4 p-4'>
+                <div className='min-w-48 bg-gray-50 rounded flex flex-col gap-4 p-4 '>
                   <p onClick={() => navigate('/my-profile')} className='hover:text-black cursor-pointer'>My Profile</p>
                   <p onClick={() => navigate('/my-appointments')} className='hover:text-black cursor-pointer'>My Appointments</p>
                   <p onClick={logout} className='hover:text-black cursor-pointer'>Logout</p>
                 </div>
               </div>
-            </div>
+            </button>
             : <button onClick={() => navigate('/login')} className='bg-[#5f6FFF] text-white px-8 py-3 rounded-full font-light hidden md:block'>Create account</button>
         }
         <img onClick={() => setShowMenu(true)} className='w-6 md:hidden' src={assets.menu_icon} alt="" />
@@ -67,6 +67,29 @@ const Navbar = () => {
             <NavLink onClick={() => setShowMenu(false)} to='/doctors' ><p className='px-4 py-2 rounded full inline-block'>ALL DOCTORS</p></NavLink>
             <NavLink onClick={() => setShowMenu(false)} to='/about' ><p className='px-4 py-2 rounded full inline-block'>ABOUT</p></NavLink>
             <NavLink onClick={() => setShowMenu(false)} to='/contact' ><p className='px-4 py-2 rounded full inline-block'>CONTACT</p></NavLink>
+            {
+              !token && !userData
+              ? ''
+              : <NavLink onClick={() => setShowMenu(false)} to='/my-profile' className=' px-4 py-2 rounded full inline-block'>My Profile</NavLink>
+            }
+            {
+              !token && !userData
+              ? ''
+              : <NavLink onClick={() => setShowMenu(false)} to='/my-appointments' className=' px-4 py-2 rounded full inline-block'>My Appointments</NavLink>
+            }
+             {
+              !token
+              ? <NavLink onClick={() => { setShowMenu(false); navigate('/login'); }} to='/login' className='bg-purple-500 hover:opacity-75 text-white px-4 py-2 rounded font-semibold'>Login</NavLink>
+              :<NavLink onClick={() => { logout(); setShowMenu(false); }} to='/login' className='bg-purple-500 hover:opacity-75 text-white px-4 py-2 rounded font-semibold'>Logout</NavLink>
+            }
+            
+            {
+              !token
+              ? <NavLink onClick={() => setShowMenu(false)} to='/login' className='bg-purple-500 hover:opacity-75 text-white px-4 py-2 rounded font-semibold'>Create account</NavLink>
+              : ''
+            }
+           
+
           </ul>
         </div>
       </div>
