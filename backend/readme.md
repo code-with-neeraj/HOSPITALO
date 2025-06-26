@@ -1,21 +1,36 @@
-# Prescripto Backend
+# 🏥 Hospitalo Backend
 
-This is the backend for the Prescripto healthcare appointment and management system. It is built with **Node.js**, **Express.js**, **MongoDB**, and uses **dotenv** for environment configuration.
-
----
-
-## Features
-
-- User registration and login with JWT authentication
-- Doctor registration (admin), login, and profile management
-- Appointment booking, cancellation, and payment (Razorpay integration)
-- Admin dashboard for managing doctors and appointments
-- RESTful API structure with input validation and error handling
-- File upload support (profile images) via Multer and Cloudinary
+Welcome to the **Hospitalo Backend**!  
+This backend powers the Hospitalo healthcare platform, providing secure APIs for user, doctor, and admin operations.
 
 ---
 
-## Project Structure
+## 🛠️ Tech Stack
+
+| Technology   | Icon                                                                 |
+|--------------|----------------------------------------------------------------------|
+| Node.js      | ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white&style=for-the-badge) |
+| Express.js   | ![Express.js](https://img.shields.io/badge/Express.js-000000?logo=express&logoColor=white&style=for-the-badge) |
+| MongoDB      | ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white&style=for-the-badge) |
+| JWT          | ![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white&style=for-the-badge) |
+| Razorpay     | ![Razorpay](https://img.shields.io/badge/Razorpay-02042B?logo=razorpay&logoColor=white&style=for-the-badge) |
+| Cloudinary   | ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?logo=cloudinary&logoColor=white&style=for-the-badge) |
+| Multer       | ![Multer](https://img.shields.io/badge/Multer-FFCA28?logo=upload&logoColor=black&style=for-the-badge) |
+
+---
+
+## 🚀 Features
+
+- 👤 **User Auth**: Registration, login, profile management
+- 👨‍⚕️ **Doctor Management**: Add, list, update, and manage doctors
+- 📅 **Appointments**: Book, cancel, and complete appointments
+- 💳 **Payments**: Razorpay integration for secure payments
+- 🛡️ **Admin Panel**: Manage doctors, appointments, and analytics
+- ☁️ **Image Upload**: Profile images via Multer & Cloudinary
+
+---
+
+## 📁 Project Structure
 
 ```
 backend/
@@ -51,218 +66,157 @@ backend/
 
 ---
 
-## Setup
+## 📡 API Endpoints & Examples
 
-1. **Install dependencies:**
-   ```sh
-   npm install
-   ```
+### 👤 User APIs (`/api/user`)
 
-2. **Environment Variables:**
-   Create a `.env` file in the `backend/` directory with the following keys:
-   ```
-   MONGODB_URI=mongodb://localhost:27017
-   JWT_SECRET=your_jwt_secret
-   CLOUDINARY_NAME=your_cloudinary_name
-   CLOUDINARY_API_KEY=your_cloudinary_api_key
-   CLOUDINARY_SECRET_KEY=your_cloudinary_secret
-   ADMIN_EMAIL=admin@example.com
-   ADMIN_PASSWORD=adminpassword
-   RAZORPAY_KEY_ID=your_razorpay_key_id
-   RAZORPAY_KEY_SECRET=your_razorpay_key_secret
-   CURRENCY=INR
-   PORT=4000
-   ```
+- **POST /register** — Register a new user  
+  **Request:**  
+  ```json
+  { "name": "John Doe", "email": "john@example.com", "password": "yourpassword" }
+  ```
+  **Response:**  
+  ```json
+  { "success": true, "token": "jwt_token_here", "user": { "id": "user_id", "name": "John Doe", "email": "john@example.com" } }
+  ```
 
-3. **Start the server:**
-   ```sh
-   npm run server
-   ```
-   The server will run on the port specified in `.env` (default: 4000).
+- **POST /login** — User login  
+  **Request:**  
+  ```json
+  { "email": "john@example.com", "password": "yourpassword" }
+  ```
+  **Response:**  
+  ```json
+  { "success": true, "token": "jwt_token_here" }
+  ```
 
----
+- **GET /get-profile** — Get user profile (auth required)  
+  **Headers:** `{ token: <jwt_token> }`  
+  **Response:**  
+  ```json
+  { "success": true, "userData": { ... } }
+  ```
 
-## API Endpoints
-
-### User APIs (`/api/user`)
-- `POST /register` — Register a new user
-- `POST /login` — User login
-- `GET /get-profile` — Get user profile (auth required)
-- `POST /update-profile` — Update user profile (auth, file upload)
-- `POST /book-appointment` — Book an appointment (auth)
-- `GET /appointments` — List user appointments (auth)
-- `POST /cancel-appointment` — Cancel an appointment (auth)
-- `POST /payment-razorpay` — Initiate Razorpay payment (auth)
-- `POST /verifyRazorpay` — Verify Razorpay payment (auth)
-
-### Doctor APIs (`/api/doctor`)
-- `GET /list` — List all doctors
-- `POST /login` — Doctor login
-- `GET /appointments` — Doctor's appointments (auth)
-- `POST /complete-appointment` — Mark appointment as complete (auth)
-- `POST /cancel-appointment` — Cancel appointment (auth)
-- `GET /dashboard` — Doctor dashboard stats (auth)
-- `GET /profile` — Get doctor profile (auth)
-- `POST /update-profile` — Update doctor profile (auth)
-
-### Admin APIs (`/api/admin`)
-- `POST /login` — Admin login
-- `POST /add-doctor` — Add a new doctor (auth, file upload)
-- `POST /all-doctors` — List all doctors (auth)
-- `POST /change-availability` — Change doctor availability (auth)
-- `GET /appointments` — List all appointments (auth)
-- `POST /cancel-appointment` — Cancel appointment (auth)
-- `GET /dashboard` — Admin dashboard stats (auth)
+- **POST /book-appointment** — Book an appointment (auth)  
+  **Request:**  
+  ```json
+  { "doctorId": "doctor_id", "date": "2024-06-10", "time": "10:00" }
+  ```
+  **Response:**  
+  ```json
+  { "success": true, "appointment": { "id": "appointment_id", "doctorId": "doctor_id", "userId": "user_id", "date": "2024-06-10", "time": "10:00" } }
+  ```
 
 ---
 
-## Middlewares
+### 👨‍⚕️ Doctor APIs (`/api/doctor`)
 
-- **authUser**: JWT authentication for users ([middlewares/authUser.js](middlewares/authUser.js))
-- **authDoctor**: JWT authentication for doctors ([middlewares/authDoctor.js](middlewares/authDoctor.js))
-- **authAdmin**: JWT authentication for admin ([middlewares/authAdmin.js](middlewares/authAdmin.js))
-- **multer**: File upload handling ([middlewares/multer.js](middlewares/multer.js))
+- **GET /list** — List all doctors  
+  **Response:**  
+  ```json
+  { "success": true, "doctors": [ { "id": "doctor_id", "name": "Dr. Smith", ... } ] }
+  ```
 
----
+- **POST /login** — Doctor login  
+  **Request:**  
+  ```json
+  { "email": "drsmith@example.com", "password": "yourpassword" }
+  ```
+  **Response:**  
+  ```json
+  { "success": true, "token": "doctor_jwt_token" }
+  ```
 
-## Database Models
+- **GET /appointments** — Doctor's appointments (auth)  
+  **Headers:** `{ dToken: <doctor_jwt_token> }`  
+  **Response:**  
+  ```json
+  { "success": true, "appointments": [ ... ] }
+  ```
 
-- **User**: [models/userModel.js](models/userModel.js)
-- **Doctor**: [models/doctorModel.js](models/doctorModel.js)
-- **Appointment**: [models/appointmentModel.js](models/appointmentModel.js)
-
----
-
-## Notes
-
-- All protected routes require the appropriate JWT token in the request headers.
-- File uploads (profile images) are handled via Multer and stored on Cloudinary.
-- Payment integration uses Razorpay for appointment payments.
-
----
-
-## Visual Guide
-
-### Tech Stack
-
-| Technology   | Icon                                                                 |
-|--------------|----------------------------------------------------------------------|
-| Node.js      | ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white&style=for-the-badge) |
-| Express.js   | ![Express.js](https://img.shields.io/badge/Express.js-000000?logo=express&logoColor=white&style=for-the-badge) |
-| MongoDB      | ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white&style=for-the-badge) |
-| Razorpay     | ![Razorpay](https://img.shields.io/badge/Razorpay-02042B?logo=razorpay&logoColor=white&style=for-the-badge) |
-| Cloudinary   | ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?logo=cloudinary&logoColor=white&style=for-the-badge) |
-| Multer       | ![Multer](https://img.shields.io/badge/Multer-FFCA28?logo=upload&logoColor=black&style=for-the-badge) |
-| JWT          | ![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white&style=for-the-badge) |
+- **POST /complete-appointment** — Mark appointment as complete (auth)  
+  **Request:**  
+  ```json
+  { "appointmentId": "appointment_id" }
+  ```
+  **Response:**  
+  ```json
+  { "success": true, "message": "Appointment completed" }
+  ```
 
 ---
 
-## Example API Requests
+### 🛡️ Admin APIs (`/api/admin`)
 
-### User Registration
+- **POST /login** — Admin login  
+  **Request:**  
+  ```json
+  { "email": "admin@example.com", "password": "adminpassword" }
+  ```
+  **Response:**  
+  ```json
+  { "success": true, "token": "admin_jwt_token" }
+  ```
 
-<details>
-<summary>Request</summary>
+- **POST /add-doctor** — Add a new doctor (auth, file upload)  
+  **Request:**  
+  `Content-Type: multipart/form-data`  
+  ```
+  name: "Dr. Smith"
+  email: "drsmith@example.com"
+  password: "yourpassword"
+  speciality: "Cardiology"
+  degree: "MBBS"
+  experience: "5 Years"
+  about: "Experienced Cardiologist"
+  fees: 100
+  address: '{"line1":"123 Main St","line2":"City"}'
+  image: <file>
+  ```
+  **Response:**  
+  ```json
+  { "success": true, "message": "Doctor Added" }
+  ```
 
-```http
-POST /api/user/register
-Content-Type: application/json
+- **POST /all-doctors** — List all doctors (auth)  
+  **Headers:** `{ aToken: <admin_jwt_token> }`  
+  **Response:**  
+  ```json
+  { "success": true, "doctors": [ ... ] }
+  ```
 
-{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "yourpassword"
-}
-```
-</details>
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-    "success": true,
-    "token": "jwt_token_here",
-    "user": {
-        "id": "user_id",
-        "name": "John Doe",
-        "email": "john@example.com"
-    }
-}
-```
-</details>
-
----
-
-### Book Appointment
-
-<details>
-<summary>Request</summary>
-
-```http
-POST /api/user/book-appointment
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-    "doctorId": "doctor_id",
-    "date": "2024-06-10",
-    "time": "10:00"
-}
-```
-</details>
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-    "success": true,
-    "appointment": {
-        "id": "appointment_id",
-        "doctorId": "doctor_id",
-        "userId": "user_id",
-        "date": "2024-06-10",
-        "time": "10:00"
-    }
-}
-```
-</details>
+- **GET /appointments** — List all appointments (auth)  
+  **Headers:** `{ aToken: <admin_jwt_token> }`  
+  **Response:**  
+  ```json
+  { "success": true, "appointments": [ ... ] }
+  ```
 
 ---
 
-### Admin Add Doctor
+## 🛡️ Middlewares
 
-<details>
-<summary>Request</summary>
+- **authUser**: JWT authentication for users
+- **authDoctor**: JWT authentication for doctors
+- **authAdmin**: JWT authentication for admin
+- **multer**: File upload handling
 
-```http
-POST /api/admin/add-doctor
-Authorization: Bearer <admin_jwt_token>
-Content-Type: multipart/form-data
+---
 
-{
-    "name": "Dr. Smith",
-    "email": "drsmith@example.com",
-    "specialization": "Cardiology",
-    "profileImage": "<file>"
-}
-```
-</details>
+## 🗄️ Database Models
 
-<details>
-<summary>Response</summary>
+- **User**: User information and credentials
+- **Doctor**: Doctor profiles and availability
+- **Appointment**: Appointment details and status
 
-```json
-{
-    "success": true,
-    "doctor": {
-        "id": "doctor_id",
-        "name": "Dr. Smith",
-        "email": "drsmith@example.com",
-        "specialization": "Cardiology",
-        "profileImage": "cloudinary_url"
-    }
-}
-```
-</details>
+---
+
+## 📬 Contact
+
+For support or feedback, contact:  
+📧 neerajkr145518@gmail.com  
+📞 +7277959834
+
+---
+
+> _Empowering healthcare
