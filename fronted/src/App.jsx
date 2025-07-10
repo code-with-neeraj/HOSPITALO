@@ -11,6 +11,7 @@ import Appointment from './pages/Appointment';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { ToastContainer } from 'react-toastify';
+import ResetPassword from './pages/ResetPassword';
 
 
 const App = () => {
@@ -33,6 +34,11 @@ const App = () => {
       <Route path='/doctors' element={<Doctors />} />
       <Route path='/doctors/:speciality' element={<Doctors />} />
       <Route path='/login' element={<Login />} />
+
+      
+      <Route path='/reset-password' element={<ResetPassword/>} />
+
+
       <Route path='/about' element={<About />} />
       <Route path='/contact' element={<Contact />} />
       <Route path='/my-profile' element={<MyProfile />} />

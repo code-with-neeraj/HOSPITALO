@@ -1,6 +1,8 @@
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/userModel.js'
+import transporter from '../config/nodemailer.js'
+import { EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE } from '../config/emailTemplates.js'
 import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
@@ -24,6 +26,12 @@ const registerUser = async (req, res) => {
             return res.json({ success: false, message: "enter a valid email" })
         }
 
+        const existingUser = await userModel.findOne({ email })
+
+        if (existingUser) {
+            return res.json({ success: false, message: 'User already exists' })
+        }
+
         // validating strong password
         if (password.length < 8) {
             return res.json({ success: false, message: "enter a strong password" })
@@ -42,7 +50,24 @@ const registerUser = async (req, res) => {
         const newUser = new userModel(userData)
         const user = await newUser.save()
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+
+         // Sending welcome email
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: user.email,
+            subject: 'Welcome to Hospitalo',
+            text: `Welcome to Hospitalo website. Your account has been created with email id: ${email}`
+        }
+
+        await transporter.sendMail(mailOptions);
 
         res.json({ success: true, token })
 
@@ -63,17 +88,32 @@ const loginUser = async (req, res) => {
         const { email, password } = req.body
         const user = await userModel.findOne({ email })
 
+        if (!email || !password) {
+            return res.json({ success: false, message: 'Email and password are required' })
+        }
+
         if (!user) {
             return res.json({ success: false, message: 'User does not exist' })
         }
 
         const isMatch = await bcrypt.compare(password, user.password)
 
+        if (!isMatch) {
+            return res.json({ success: false, message: 'Incorrect password' });
+        }
+
         if (isMatch) {
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
-            res.json({ success: true, token })
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+            res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+
+            return res.json({ success: true, token })
         } else {
-            res.json({ success: false, message: "Invalid credentials" })
+            return res.json({ success: false, message: "Invalid credentials" })
         }
 
     } catch (error) {
@@ -81,6 +121,101 @@ const loginUser = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 
+}
+
+const logout = async (req, res) => {
+
+    try {
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+        });
+        return res.json({ success: true, message: 'Logged out' });
+
+
+    } catch (error) {
+        return res.json({ success: false, message: error.message })
+    }
+
+}
+
+
+
+// Send Password Reset OTP
+const sendResetOtp = async (req, res)=> {
+    const {email} = req.body;
+
+    if (!email) {
+        return res.json({ success: false, message: "Email is required" });
+    }
+
+    try {
+
+        const user = await userModel.findOne({email})
+        if(!user){
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        const otp = String(Math.floor(100000 + Math.random() * 900000))
+
+        user.resetOtp = otp;
+        user.resetOtpExpireAt = Date.now() + 15 * 60 * 1000
+
+        await user.save()
+
+        const mailOption = {
+            from: process.env.SENDER_EMAIL,
+            to: user.email,
+            subject: 'Password Reset OTP',
+            // text: `Your OTP for resetting your password is ${otp}. Use this OTP to proceed with resetting your password.`,
+            html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email) 
+        }
+
+        await transporter.sendMail(mailOption);
+
+        return res.json({ success: true, message: "OTP sent to your email" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+
+// Reset User Password
+const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+        return res.json({ success: false, message: "Email, OTP, and new password are required" });
+    }
+
+    try {
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        if (user.resetOtp === "" || user.resetOtp !== otp) {
+            return res.json({ success: false, message: "Invalid OTP" });
+        }
+
+        if (user.resetOtpExpireAt < Date.now()) {
+            return res.json({ success: false, message: "OTP Expired" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.resetOtp = "";
+        user.resetOtpExpireAt = 0;
+
+        await user.save();
+
+        return res.json({ success: true, message: "Password reset successful" });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
 }
 
 
@@ -307,6 +442,4 @@ const verifyRazorpay = async (req, res) => {
 
 
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay }
-
-
+export { registerUser, loginUser, logout, sendResetOtp, resetPassword ,getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay }
