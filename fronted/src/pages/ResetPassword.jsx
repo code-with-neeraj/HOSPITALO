@@ -162,14 +162,14 @@ const ResetPassword = () => {
         <form onSubmit={onSubmitOTP} className='p-8 rounded-lg shadow-lg w-96 text-sm border text-zinc-600'>
           <h1 className='text-2xl font-semibold text-center mb-4'>Enter OTP</h1>
           <p className='text-center mb-6'>Enter the 6-digit code sent to your email</p>
-          <div className='flex gap-1 justify-between mb-8' onPaste={handlePaste}>
+          <div className='flex gap-1 justify-between mb-8 gap-x-2' onPaste={handlePaste}>
             {Array(6).fill(0).map((_, index) => (
               <input
                 type="text"
                 maxLength="1"
                 key={index}
                 required
-                className='w-12 h-12 bg-gray-100 text-black text-center text-xl rounded-md font-semibold'
+                className='w-12 h-12 bg-gray-100 text-black text-center text-xl rounded-md'
                 ref={el => inputRefs.current[index] = el}
                 onInput={(e) => handleInput(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
