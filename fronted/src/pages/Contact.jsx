@@ -34,7 +34,7 @@ const Contact = () => {
           </p>
           {/* Careers heading */}
           <p className="font-semibold text-lg text-gray-600">
-            Careers at prescripto
+            Careers at hospitalo
           </p>
           {/* Careers description */}
           <p className="text-gray-500">
