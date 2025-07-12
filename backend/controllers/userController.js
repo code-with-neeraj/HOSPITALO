@@ -77,8 +77,6 @@ const registerUser = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 }
-
-
 // API  for user login
 const loginUser = async (req, res) => {
 
@@ -122,6 +120,7 @@ const loginUser = async (req, res) => {
     }
 
 }
+
 
 const logout = async (req, res) => {
 
@@ -181,8 +180,38 @@ const sendResetOtp = async (req, res)=> {
     }
 }
 
+// ✅ Verify Reset OTP
+export const verifyResetOtp = async (req, res) => {
+    const { email, otp } = req.body;
 
-// Reset User Password
+    if (!email || !otp) {
+        return res.json({ success: false, message: "Email and OTP are required" });
+    }
+
+    try {
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        if (!user.resetOtp || user.resetOtp !== otp) {
+            return res.json({ success: false, message: "Invalid OTP" });
+        }
+
+        if (user.resetOtpExpireAt < Date.now()) {
+            return res.json({ success: false, message: "OTP expired" });
+        }
+
+        return res.json({ success: true, message: "OTP verified successfully" });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+};
+
+
+
+// 🔒 Reset Password After OTP
 const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
 
@@ -197,14 +226,15 @@ const resetPassword = async (req, res) => {
             return res.json({ success: false, message: "User not found" });
         }
 
-        if (user.resetOtp === "" || user.resetOtp !== otp) {
+        if (!user.resetOtp || user.resetOtp !== otp) {
             return res.json({ success: false, message: "Invalid OTP" });
         }
 
         if (user.resetOtpExpireAt < Date.now()) {
-            return res.json({ success: false, message: "OTP Expired" });
+            return res.json({ success: false, message: "OTP expired" });
         }
 
+        // Update password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
         user.resetOtp = "";
@@ -214,9 +244,10 @@ const resetPassword = async (req, res) => {
 
         return res.json({ success: true, message: "Password reset successful" });
     } catch (error) {
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
-}
+};
+
 
 
 // API to get user profile data
@@ -438,6 +469,8 @@ const verifyRazorpay = async (req, res) => {
     }
 
 }
+
+
 
 
 
