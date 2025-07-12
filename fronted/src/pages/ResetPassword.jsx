@@ -13,24 +13,43 @@ const ResetPassword = () => {
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isEmailSent, setIsEmailSent] = useState(false);
   const [otp, setOtp] = useState('');
-  const [isOtpSubmitted, setIsOtpSubmitted] = useState(false);
+  const [step, setStep] = useState("email");
 
   const inputRefs = useRef([]);
 
-  // 🔁 Load state from localStorage on mount
-  useEffect(() => {
-    const savedEmail = localStorage.getItem("email");
-    const emailSent = localStorage.getItem("isEmailSent") === "true";
-    const otpSubmitted = localStorage.getItem("isOtpSubmitted") === "true";
-    const savedOtp = localStorage.getItem("otp");
+  // 🚀 Step Utilities
+  const getStepFromURL = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("step") || "email";
+  };
 
-    if (savedEmail) setEmail(savedEmail);
-    if (emailSent) setIsEmailSent(true);
-    if (otpSubmitted) {
-      setIsOtpSubmitted(true);
-      if (savedOtp) setOtp(savedOtp);
+  const setStepInURL = (step) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("step", step);
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+  };
+
+  // 🔁 Restore step from URL/localStorage
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("email");
+    const storedOtp = localStorage.getItem("otp");
+    const stepFromUrl = getStepFromURL();
+
+    if (storedEmail) setEmail(storedEmail);
+    if (stepFromUrl === "otp") {
+      setStep("otp");
+    } else if (stepFromUrl === "new-password") {
+      if (storedEmail && storedOtp) {
+        setEmail(storedEmail);
+        setOtp(storedOtp);
+        setStep("new-password");
+      } else {
+        setStep("email");
+        setStepInURL("email");
+      }
+    } else {
+      setStep("email");
     }
   }, []);
 
@@ -56,15 +75,16 @@ const ResetPassword = () => {
     });
   };
 
+  // 📨 Step 1: Email Submit
   const onSubmitEmail = async (e) => {
     e.preventDefault();
     try {
       const { data } = await axios.post(`${backendUrl}/api/user/send-reset-otp`, { email });
       if (data.success) {
         toast.success(data.message);
-        setIsEmailSent(true);
-        localStorage.setItem("isEmailSent", "true");
         localStorage.setItem("email", email);
+        setStep("otp");
+        setStepInURL("otp");
       } else {
         toast.error(data.message);
       }
@@ -73,16 +93,21 @@ const ResetPassword = () => {
     }
   };
 
+  // 🔢 Step 2: OTP Submit
   const onSubmitOTP = (e) => {
     e.preventDefault();
     const otpArray = inputRefs.current.map((el) => el.value);
     const finalOtp = otpArray.join('');
+    if (finalOtp.length !== 6) {
+      return toast.error("Please enter a 6-digit OTP");
+    }
     setOtp(finalOtp);
-    setIsOtpSubmitted(true);
     localStorage.setItem("otp", finalOtp);
-    localStorage.setItem("isOtpSubmitted", "true");
+    setStep("new-password");
+    setStepInURL("new-password");
   };
 
+  // 🔒 Step 3: New Password Submit
   const onSubmitNewPassword = async (e) => {
     e.preventDefault();
     try {
@@ -94,11 +119,10 @@ const ResetPassword = () => {
 
       if (data.success) {
         toast.success(data.message);
-        // clear saved data
         localStorage.removeItem("email");
-        localStorage.removeItem("isEmailSent");
-        localStorage.removeItem("isOtpSubmitted");
         localStorage.removeItem("otp");
+        setStep("email");
+        setStepInURL("email");
         navigate("/login");
       } else {
         toast.error(data.message);
@@ -111,8 +135,8 @@ const ResetPassword = () => {
   return (
     <div className='flex items-center justify-center min-h-[65vh] px-3 sm:px-0'>
       
-      {/* Step 1: Enter Email */}
-      {!isEmailSent &&
+      {/* 🔹 Step 1: Email Form */}
+      {step === "email" && (
         <form onSubmit={onSubmitEmail} className='p-8 rounded-lg shadow-lg w-96 text-sm border text-zinc-600'>
           <h1 className='text-2xl font-semibold text-center mb-4'>Reset password</h1>
           <p className='text-center mb-6'>Enter your registered email address</p>
@@ -131,14 +155,14 @@ const ResetPassword = () => {
             Submit
           </button>
         </form>
-      }
+      )}
 
-      {/* Step 2: Enter OTP */}
-      {isEmailSent && !isOtpSubmitted &&
+      {/* 🔹 Step 2: OTP Form */}
+      {step === "otp" && (
         <form onSubmit={onSubmitOTP} className='p-8 rounded-lg shadow-lg w-96 text-sm border text-zinc-600'>
-          <h1 className='text-2xl font-semibold text-center mb-4'>Reset password</h1>
-          <p className='text-center mb-6'>Enter the 6-digit code sent to your email.</p>
-          <div className='flex justify-between mb-8' onPaste={handlePaste}>
+          <h1 className='text-2xl font-semibold text-center mb-4'>Enter OTP</h1>
+          <p className='text-center mb-6'>Enter the 6-digit code sent to your email</p>
+          <div className='flex gap-1 justify-between mb-8' onPaste={handlePaste}>
             {Array(6).fill(0).map((_, index) => (
               <input
                 type="text"
@@ -156,10 +180,10 @@ const ResetPassword = () => {
             Submit
           </button>
         </form>
-      }
+      )}
 
-      {/* Step 3: Set New Password */}
-      {isEmailSent && isOtpSubmitted &&
+      {/* 🔹 Step 3: New Password Form */}
+      {step === "new-password" && (
         <form onSubmit={onSubmitNewPassword} className='p-8 rounded-lg shadow-lg w-96 text-sm border text-zinc-600'>
           <h1 className='text-2xl font-semibold text-center mb-4'>New password</h1>
           <p className='text-center mb-6'>Enter the new password below</p>
@@ -185,7 +209,7 @@ const ResetPassword = () => {
             Submit
           </button>
         </form>
-      }
+      )}
 
     </div>
   );
