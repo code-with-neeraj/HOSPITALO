@@ -18,7 +18,7 @@ const ResetPassword = () => {
 
   const inputRefs = useRef([]);
 
-  // 🚀 Step Utilities
+  // Step from URL param
   const getStepFromURL = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("step") || "email";
@@ -30,7 +30,7 @@ const ResetPassword = () => {
     window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
   };
 
-  // 🔁 Restore step from URL/localStorage
+  // Restore state on reload
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
     const storedOtp = localStorage.getItem("otp");
@@ -75,7 +75,7 @@ const ResetPassword = () => {
     });
   };
 
-  // 📨 Step 1: Email Submit
+  // Step 1: Send Email
   const onSubmitEmail = async (e) => {
     e.preventDefault();
     try {
@@ -93,21 +93,37 @@ const ResetPassword = () => {
     }
   };
 
-  // 🔢 Step 2: OTP Submit
-  const onSubmitOTP = (e) => {
+  // Step 2: Verify OTP (backend call)
+  const onSubmitOTP = async (e) => {
     e.preventDefault();
     const otpArray = inputRefs.current.map((el) => el.value);
     const finalOtp = otpArray.join('');
+
     if (finalOtp.length !== 6) {
       return toast.error("Please enter a 6-digit OTP");
     }
-    setOtp(finalOtp);
-    localStorage.setItem("otp", finalOtp);
-    setStep("new-password");
-    setStepInURL("new-password");
+
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/user/verify-reset-otp`, {
+        email,
+        otp: finalOtp,
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        setOtp(finalOtp);
+        localStorage.setItem("otp", finalOtp);
+        setStep("new-password");
+        setStepInURL("new-password");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Something went wrong while verifying OTP.");
+    }
   };
 
-  // 🔒 Step 3: New Password Submit
+  // Step 3: Submit New Password
   const onSubmitNewPassword = async (e) => {
     e.preventDefault();
     try {
@@ -134,8 +150,8 @@ const ResetPassword = () => {
 
   return (
     <div className='flex items-center justify-center min-h-[65vh] px-3 sm:px-0'>
-      
-      {/* 🔹 Step 1: Email Form */}
+
+      {/* Step 1: Email Form */}
       {step === "email" && (
         <form onSubmit={onSubmitEmail} className='p-8 rounded-lg shadow-lg w-96 text-sm border text-zinc-600'>
           <h1 className='text-2xl font-semibold text-center mb-4'>Reset password</h1>
@@ -157,7 +173,7 @@ const ResetPassword = () => {
         </form>
       )}
 
-      {/* 🔹 Step 2: OTP Form */}
+      {/* Step 2: OTP Form */}
       {step === "otp" && (
         <form onSubmit={onSubmitOTP} className='p-8 rounded-lg shadow-lg w-96 text-sm border text-zinc-600'>
           <h1 className='text-2xl font-semibold text-center mb-4'>Enter OTP</h1>
@@ -182,7 +198,7 @@ const ResetPassword = () => {
         </form>
       )}
 
-      {/* 🔹 Step 3: New Password Form */}
+      {/* Step 3: New Password */}
       {step === "new-password" && (
         <form onSubmit={onSubmitNewPassword} className='p-8 rounded-lg shadow-lg w-96 text-sm border text-zinc-600'>
           <h1 className='text-2xl font-semibold text-center mb-4'>New password</h1>
@@ -210,7 +226,6 @@ const ResetPassword = () => {
           </button>
         </form>
       )}
-
     </div>
   );
 };
