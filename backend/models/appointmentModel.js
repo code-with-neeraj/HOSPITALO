@@ -12,6 +12,12 @@ const appointmentSchema = new mongoose.Schema({
     cancelled: { type: Boolean, default: false},
     payment: { type: Boolean, default: false},
     isCompleted: { type: Boolean, default: false},
+
+    // ✅ Razorpay-related fields
+    razorpay_order_id: { type: String },
+    razorpay_payment_id: { type: String },
+    refundStatus: { type: String, default: 'pending' },       // 'pending', 'initiated', 'failed', 'completed'
+    refundInitiatedAt: { type: Date }
 })
 
 const appointmentModel = mongoose.models.appointment || mongoose.model('appointment',appointmentSchema)
