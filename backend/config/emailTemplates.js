@@ -201,7 +201,6 @@ export const PASSWORD_RESET_TEMPLATE = `
 </html>
 `;
 
-
 export const CONFIRMATION_TEMPLATE_USER = `
 <!DOCTYPE html>
 <html lang="en">
