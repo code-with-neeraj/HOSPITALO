@@ -109,104 +109,98 @@ export const EMAIL_VERIFY_TEMPLATE = `
 
 export const PASSWORD_RESET_TEMPLATE = `
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Password Reset</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" type="text/css">
-  <style type="text/css">
+  <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Open Sans', sans-serif;
-      background: #E5E5E5;
-    }
-    table, td {
-      border-collapse: collapse;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
     }
     .container {
-      width: 100%;
-      max-width: 500px;
-      margin: 70px 0px;
+      max-width: 520px;
+      margin: 50px auto;
       background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.08);
+      overflow: hidden;
     }
-    .main-content {
-      padding: 48px 30px 40px;
-      color: #000000;
-    }
-    .button {
-      width: 100%;
-      background: #22D172;
-      text-decoration: none;
-      display: inline-block;
-      padding: 10px 0;
-      color: #fff;
-      font-size: 14px;
+    .header {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
       text-align: center;
-      font-weight: bold;
-      border-radius: 7px;
+      padding: 30px 20px;
     }
-    @media only screen and (max-width: 480px) {
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 30px 20px;
+    }
+    .content h2 {
+      margin-top: 0;
+      color: #1e293b;
+      font-size: 20px;
+    }
+    .content p {
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .otp-box {
+      margin: 20px auto;
+      background: #22d3ee;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 14px 0;
+      border-radius: 8px;
+      text-align: center;
+      width: 100%;
+      letter-spacing: 2px;
+    }
+    .footer {
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+    }
+    @media only screen and (max-width: 600px) {
       .container {
-        width: 80% !important;
+        margin: 20px;
       }
-      .button {
-        width: 50% !important;
+      .content h2 {
+        font-size: 18px;
       }
     }
   </style>
 </head>
 <body>
-  <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#F6FAFB">
-    <tbody>
-      <tr>
-        <td valign="top" align="center">
-          <table class="container" width="600" cellspacing="0" cellpadding="0" border="0">
-            <tbody>
-              <tr>
-                <td class="main-content">
-                  <table width="100%" cellspacing="0" cellpadding="0" border="0">
-                    <tbody>
-                      <tr>
-                        <td style="padding: 0 0 24px; font-size: 18px; line-height: 150%; font-weight: bold;">
-                          Forgot your password?
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 10px; font-size: 14px; line-height: 150%;">
-                          We received a password reset request for your account: <span style="color: #4C83EE;">{{email}}</span>.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 16px; font-size: 14px; line-height: 150%; font-weight: 700;">
-                          Use the OTP below to reset the password.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 24px;">
-                          <p class="button" >{{otp}}</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 0 0 10px; font-size: 14px; line-height: 150%;">
-                          The password reset otp is only valid for the next 15 minutes.
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="container">
+    <div class="header">
+      <h1>Password Reset Request</h1>
+    </div>
+    <div class="content">
+      <h2>Hello,</h2>
+      <p>We received a request to reset the password for your account associated with:</p>
+      <p><strong>{{email}}</strong></p>
+      <p>Use the OTP below to reset your password:</p>
+      <div class="otp-box">{{otp}}</div>
+      <p>This OTP is valid for the next <strong>15 minutes</strong>. If you did not request a password reset, please ignore this message.</p>
+    </div>
+    <div class="footer">
+      &copy; 2025 Hospitalo. All rights reserved.
+    </div>
+  </div>
 </body>
 </html>
-`
+`;
+
 
 export const CONFIRMATION_TEMPLATE_USER = `
 <!DOCTYPE html>
