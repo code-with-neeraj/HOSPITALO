@@ -283,6 +283,7 @@ export const CONFIRMATION_TEMPLATE_USER = `
     </div>
     <div class="footer">
       <p>This is a confirmation email from <br> Hospitalo.</p>
+      <p> &copy; 2025 Hospitalo. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -391,7 +392,8 @@ export const CANCELLATION_TEMPLATE_USER = `
       <p>Best regards,<br/><strong>Hospitalo Team</strong></p>
     </div>
     <div class="footer">
-      This is a cancellation email from Hospitalo.
+      <p> This is a cancellation email from Hospitalo.</p>
+      <p> &copy; 2025 Hospitalo. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -480,6 +482,7 @@ export const CONFIRMATION_TEMPLATE_DOCTOR = `
     </div>
     <div class="footer">
       <p>This is a confirmation email from <br> Hospitalo.</p>
+      <p> &copy; 2025 Hospitalo. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -571,6 +574,7 @@ export const CANCELLATION_TEMPLATE_DOCTOR = `
     </div>
     <div class="footer">
       <p>This is a cancellation notification from <br> Hospitalo.</p>
+      <p> &copy; 2025 Hospitalo. All rights reserved.</p>
     </div>
   </div>
 </body>
