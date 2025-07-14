@@ -105,14 +105,11 @@ export const EMAIL_VERIFY_TEMPLATE = `
   </table>
 </body>
 </html>
-
 `
 
 export const PASSWORD_RESET_TEMPLATE = `
-
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
   <title>Password Reset</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -126,23 +123,19 @@ export const PASSWORD_RESET_TEMPLATE = `
       font-family: 'Open Sans', sans-serif;
       background: #E5E5E5;
     }
-
     table, td {
       border-collapse: collapse;
     }
-
     .container {
       width: 100%;
       max-width: 500px;
       margin: 70px 0px;
       background-color: #ffffff;
     }
-
     .main-content {
       padding: 48px 30px 40px;
       color: #000000;
     }
-
     .button {
       width: 100%;
       background: #22D172;
@@ -155,19 +148,16 @@ export const PASSWORD_RESET_TEMPLATE = `
       font-weight: bold;
       border-radius: 7px;
     }
-
     @media only screen and (max-width: 480px) {
       .container {
         width: 80% !important;
       }
-
       .button {
         width: 50% !important;
       }
     }
   </style>
 </head>
-
 <body>
   <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#F6FAFB">
     <tbody>
@@ -217,4 +207,379 @@ export const PASSWORD_RESET_TEMPLATE = `
 </body>
 </html>
 `
+
+export const CONFIRMATION_TEMPLATE_USER = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointment Confirmed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f8fa;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: rgba(128, 128, 128, 0.17);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .header {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: white;
+      padding: 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 30px;
+      color: #333;
+    }
+    .content h2 {
+      color: #1e293b;
+    }
+    .info {
+      margin: 20px 0;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .info p {
+      margin: 8px 0;
+    }
+    .icon {
+      margin-right: 8px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Hospitalo</h1>
+    </div>
+    <div class="content">
+      <h2>Appointment Confirmed </h2>
+      <p>Dear {{name}},</p>
+      <p>We are pleased to inform you that your appointment has been successfully booked. Here are the details:</p>
+
+      <div class="info">
+        <p><span class="icon">👨‍⚕️</span><strong>{{doctorName}}</strong></p>
+        <p><span class="icon">📅</span>{{slotDate}}</p>
+        <p><span class="icon">⏰</span>{{slotTime}}</p>
+      </div>
+
+      <p>If you have any questions or wish to reschedule, feel free to contact us.</p>
+      <p>Best regards,<br/><strong>Hospitalo</strong></p>
+    </div>
+    <div class="footer">
+      <p>This is a confirmation email from <br> Hospitalo.</p>
+    </div>
+  </div>
+</body>
+</html>
+
+`
+
+export const CANCELLATION_TEMPLATE_USER = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointment Cancelled</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f8fa;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 500px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .header {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 30px 25px;
+      color: #333333;
+    }
+    .content h2 {
+      color: #e11d48;
+      margin-bottom: 10px;
+    }
+    .content p {
+      font-size: 15px;
+      line-height: 1.6;
+      margin: 10px 0;
+    }
+    .info {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .info p {
+      margin: 8px 0;
+      font-size: 15px;
+    }
+    .icon {
+      margin-right: 6px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      padding: 15px;
+      background-color: #f9fafb;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .email-container {
+        margin: 10px;
+        border-radius: 0;
+      }
+      .content {
+        padding: 20px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Hospitalo</h1>
+    </div>
+    <div class="content">
+      <h2>Appointment Cancelled</h2>
+      <p>Dear {{name}},</p>
+      <p>We regret to inform you that your appointment has been cancelled. Here are the details:</p>
+
+      <div class="info">
+        <p><span class="icon">👨‍⚕️</span><strong>{{doctorName}}</strong></p>
+        <p><span class="icon">📅</span><strong>{{slotDate}}</strong></p>
+        <p><span class="icon">⏰</span><strong>{{slotTime}}</strong></p>
+      </div>
+
+     <p>Your appointment has been cancelled. Since you had already paid the doctor's fees online and the doctor had accepted the appointment, no refund is applicable.</p>
+     <p>As the doctor did not accept your appointment, your refund has been initiated and will be processed within 2 working days.</p>
+
+      <p>If you have any questions or wish to reschedule, feel free to contact us.</p>
+      <p>Best regards,<br/><strong>Hospitalo Team</strong></p>
+    </div>
+    <div class="footer">
+      This is a cancellation email from Hospitalo.
+    </div>
+  </div>
+</body>
+</html>
+`;
+
+
+export const CONFIRMATION_TEMPLATE_DOCTOR = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointment Confirmed By Doctor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f8fa;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .header {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: white;
+      padding: 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 30px;
+      color: #333;
+    }
+    .content h2 {
+      color: #1e293b;
+    }
+    .info {
+      margin: 20px 0;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .info p {
+      margin: 8px 0;
+    }
+    .icon {
+      margin-right: 8px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Hospitalo</h1>
+    </div>
+    <div class="content">
+      <h2>Appointment Confirmed</h2>
+      <p>Dear {{name}},</p>
+      <p>We are pleased to inform you that your appointment has been confirmed by doctor. Here are the details:</p>
+
+      <div class="info">
+        <p><span class="icon">👨‍⚕️</span><strong>{{doctorName}}</strong></p>
+        <p><span class="icon">📅</span>{{slotDate}}</p>
+        <p><span class="icon">⏰</span>{{slotTime}}</p>
+      </div>
+
+      <p>If you have any questions or wish to reschedule, feel free to contact us.</p>
+      <p>Best regards,<br/><strong>Hospitalo Team</strong></p>
+    </div>
+    <div class="footer">
+      <p>This is a confirmation email from <br> Hospitalo.</p>
+    </div>
+  </div>
+</body>
+</html>
+
+`;
+
+export const CANCELLATION_TEMPLATE_DOCTOR = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointment Cancelled by Doctor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f8fa;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .header {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: white;
+      padding: 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 30px;
+      color: #333;
+    }
+    .content h2 {
+      color: #1e293b;
+    }
+    .info {
+      margin: 20px 0;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .info p {
+      margin: 8px 0;
+    }
+    .icon {
+      margin-right: 8px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Hospitalo</h1>
+    </div>
+    <div class="content">
+      <h2>Appointment Cancelled</h2>
+      <p>Dear {{name}},</p>
+      <p>We regret to inform you that your appointment has been cancelled by the doctor. Here are the details:</p>
+
+      <div class="info">
+        <p><span class="icon">👨‍⚕️</span><strong>{{doctorName}}</strong></p>
+        <p><span class="icon">📅</span>{{slotDate}}</p>
+        <p><span class="icon">⏰</span>{{slotTime}}</p>
+      </div>
+
+      <p>Since you paid online, your refund has been initiated and will be processed within 2 working days.</p>
+
+      <p>If you have any questions or wish to reschedule, feel free to contact us.</p>
+      <p>Best regards,<br/><strong>Hospitalo Team</strong></p>
+    </div>
+    <div class="footer">
+      <p>This is a cancellation notification from <br> Hospitalo.</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
 
