@@ -2,13 +2,18 @@ import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/userModel.js'
 import transporter from '../config/nodemailer.js'
-import { EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE } from '../config/emailTemplates.js'
+import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER } from '../config/emailTemplates.js'
 import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
 import razorpay from 'razorpay'
 
+
+const razorpayInstance = new razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+})
 
 //API to register user
 const registerUser = async (req, res) => {
@@ -59,7 +64,7 @@ const registerUser = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
-         // Sending welcome email
+        // Sending welcome email
         const mailOptions = {
             from: process.env.SENDER_EMAIL,
             to: user.email,
@@ -103,11 +108,11 @@ const loginUser = async (req, res) => {
         if (isMatch) {
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
             res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            })
 
             return res.json({ success: true, token })
         } else {
@@ -142,8 +147,8 @@ const logout = async (req, res) => {
 
 
 // Send Password Reset OTP
-const sendResetOtp = async (req, res)=> {
-    const {email} = req.body;
+const sendResetOtp = async (req, res) => {
+    const { email } = req.body;
 
     if (!email) {
         return res.json({ success: false, message: "Email is required" });
@@ -151,8 +156,8 @@ const sendResetOtp = async (req, res)=> {
 
     try {
 
-        const user = await userModel.findOne({email})
-        if(!user){
+        const user = await userModel.findOne({ email })
+        if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
 
@@ -168,7 +173,7 @@ const sendResetOtp = async (req, res)=> {
             to: user.email,
             subject: 'Password Reset OTP',
             // text: `Your OTP for resetting your password is ${otp}. Use this OTP to proceed with resetting your password.`,
-            html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email) 
+            html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email)
         }
 
         await transporter.sendMail(mailOption);
@@ -344,8 +349,19 @@ const bookAppointment = async (req, res) => {
         // save new slots data in docData
         await doctorModel.findByIdAndUpdate(docId, { slots_booked })
 
-        res.json({ success: true, message: 'Appointment Booked' })
+        // Send appointment confirmation email
+        await transporter.sendMail({
+            from: process.env.SENDER_EMAIL,
+            to: userData.email,
+            subject: "Appointment Confirmed",
+            html: CONFIRMATION_TEMPLATE_USER
+                .replace("{{name}}", userData.name)
+                .replace("{{doctorName}}", docData.name)
+                .replace("{{slotDate}}", slotDate)
+                .replace("{{slotTime}}", slotTime)
+        });
 
+        res.json({ success: true, message: 'Appointment Booked' })
 
     } catch (error) {
         console.log(error)
@@ -371,48 +387,117 @@ const listAppintment = async (req, res) => {
 
 }
 
-// API to cencel appointment
+// API to cancel appointment with refund logic
 const cancelAppointment = async (req, res) => {
-
     try {
+        const { userId, appointmentId } = req.body;
 
-        const { userId, appointmentId } = req.body
+        const appointmentData = await appointmentModel.findById(appointmentId);
+        const userData = await userModel.findById(userId).select('-password');
 
-        const appointmentData = await appointmentModel.findById(appointmentId)
-
-        // verify appointment user
-        if (appointmentData.userId !== userId) {
-            return res.json({ success: false, message: 'Unauthorized action' })
+        if (!appointmentData) {
+            return res.json({ success: false, message: "Appointment not found" });
         }
 
-        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
+        if (!userData) {
+            return res.json({ success: false, message: "User not found" });
+        }
 
-        // releasing doctor slot
+        if (appointmentData.userId.toString() !== userId) {
+            return res.json({ success: false, message: "Unauthorized action" });
+        }
 
-        const { docId, slotDate, slotTime } = appointmentData
+        if (appointmentData.cancelled) {
+            return res.json({ success: false, message: "Appointment already cancelled" });
+        }
 
-        const doctorData = await doctorModel.findById(docId)
+        const doctor = await doctorModel.findById(appointmentData.docId);
+        if (!doctor) {
+            return res.json({ success: false, message: "Doctor not found" });
+        }
 
-        let slots_booked = doctorData.slots_booked
+        const docData = doctor; // optional alias for clarity
+        const { slotDate, slotTime } = appointmentData;
 
-        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+        // If doctor has NOT accepted yet → Refund is allowed
+        if (!appointmentData.accepted && appointmentData.payment) {
+            try {
+                await razorpayInstance.payments.refund(appointmentData.paymentId);
+                appointmentData.refundStatus = "initiated";
+                appointmentData.cancelled = true;
+                await appointmentData.save();
 
-        await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+                // Release doctor slot
+                if (doctor?.slots_booked[slotDate]) {
+                    doctor.slots_booked[slotDate] = doctor.slots_booked[slotDate].filter((e) => e !== slotTime);
+                    await doctorModel.findByIdAndUpdate(appointmentData.docId, {
+                        slots_booked: doctor.slots_booked,
+                    });
+                }
 
-        res.json({ success: true, message: 'Appointment Cancelled' })
+                // Send cancellation email (with refund)
+                await transporter.sendMail({
+                    from: process.env.SENDER_EMAIL,
+                    to: userData.email,
+                    subject: "Appointment Cancelled ❌",
+                    html: CANCELLATION_TEMPLATE_USER
+                        .replace("{{name}}", userData.name)
+                        .replace("{{doctorName}}", docData.name)
+                        .replace("{{slotDate}}", slotDate)
+                        .replace("{{slotTime}}", slotTime)
+                        .replace(
+                            "{{refundNote}}",
+                            `<p>Your payment has been refunded and will reflect in your account within 2 working days.</p>`
+                        ),
+                });
 
+                return res.json({
+                    success: true,
+                    message: "Appointment cancelled. Refund initiated.",
+                });
+            } catch (refundError) {
+                console.log("Refund error:", refundError);
+                return res.json({ success: false, message: "Refund failed. Please contact support." });
+            }
+        }
 
+        // Doctor already accepted → no refund
+        appointmentData.cancelled = true;
+        await appointmentData.save();
+
+        // Release doctor slot
+        if (doctor?.slots_booked[slotDate]) {
+            doctor.slots_booked[slotDate] = doctor.slots_booked[slotDate].filter((e) => e !== slotTime);
+            await doctorModel.findByIdAndUpdate(appointmentData.docId, {
+                slots_booked: doctor.slots_booked,
+            });
+        }
+
+        // Send cancellation email (no refund)
+        await transporter.sendMail({
+            from: process.env.SENDER_EMAIL,
+            to: userData.email,
+            subject: "Appointment Cancelled ❌",
+            html: CANCELLATION_TEMPLATE_USER
+                .replace("{{name}}", userData.name)
+                .replace("{{doctorName}}", docData.name)
+                .replace("{{slotDate}}", slotDate)
+                .replace("{{slotTime}}", slotTime)
+                .replace(
+                    "{{refundNote}}",
+                    `<p>Since the doctor had already accepted the appointment, no refund is applicable.</p>`
+                ),
+        });
+
+        return res.json({
+            success: true,
+            message: "Appointment cancelled. No refund as doctor had already accepted.",
+        });
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log(error);
+        return res.json({ success: false, message: error.message });
     }
-
-}
-
-const razorpayInstance = new razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-})
+};
 
 
 // API to make payment of appointment using razorpay
@@ -451,18 +536,18 @@ const verifyRazorpay = async (req, res) => {
 
     try {
 
-        const {razorpay_order_id} = req.body
+        const { razorpay_order_id } = req.body
         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
 
         if (orderInfo.status === 'paid') {
-            await appointmentModel.findByIdAndUpdate(orderInfo.receipt,{payment:true})
-            res.json({success:true,message:"Payment Successful"})
+            await appointmentModel.findByIdAndUpdate(orderInfo.receipt, { payment: true })
+            res.json({ success: true, message: "Payment Successful" })
         } else {
-            res.json({success:false,message:"Payment Failed"})
+            res.json({ success: false, message: "Payment Failed" })
 
         }
-        
-        
+
+
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
@@ -471,8 +556,4 @@ const verifyRazorpay = async (req, res) => {
 }
 
 
-
-
-
-
-export { registerUser, loginUser, logout, sendResetOtp, resetPassword ,getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay }
+export { registerUser, loginUser, logout, sendResetOtp, resetPassword, getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay }
