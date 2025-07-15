@@ -1,3 +1,4 @@
+
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/userModel.js'
@@ -361,6 +362,7 @@ const bookAppointment = async (req, res) => {
                 .replace("{{slotTime}}", slotTime)
         });
 
+
         res.json({ success: true, message: 'Appointment Booked' })
 
     } catch (error) {
@@ -387,117 +389,63 @@ const listAppintment = async (req, res) => {
 
 }
 
-// API to cancel appointment with refund logic
+// API to cancel appointment
 const cancelAppointment = async (req, res) => {
     try {
         const { userId, appointmentId } = req.body;
-
         const appointmentData = await appointmentModel.findById(appointmentId);
-        const userData = await userModel.findById(userId).select('-password');
 
         if (!appointmentData) {
             return res.json({ success: false, message: "Appointment not found" });
         }
 
-        if (!userData) {
-            return res.json({ success: false, message: "User not found" });
-        }
-
+        // verify appointment user
         if (appointmentData.userId.toString() !== userId) {
-            return res.json({ success: false, message: "Unauthorized action" });
+            return res.json({ success: false, message: 'Unauthorized action' });
         }
 
-        if (appointmentData.cancelled) {
-            return res.json({ success: false, message: "Appointment already cancelled" });
-        }
+        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true });
 
-        const doctor = await doctorModel.findById(appointmentData.docId);
-        if (!doctor) {
-            return res.json({ success: false, message: "Doctor not found" });
-        }
+        // releasing doctor slot 
+        const { docId, slotDate, slotTime } = appointmentData;
 
-        const docData = doctor; // optional alias for clarity
-        const { slotDate, slotTime } = appointmentData;
+        const doctorData = await doctorModel.findById(docId);
+        const userData = await userModel.findById(userId); // ✅ Fetch userData
 
-        // If doctor has NOT accepted yet → Refund is allowed
-        if (!appointmentData.accepted && appointmentData.payment) {
-            try {
-                await razorpayInstance.payments.refund(appointmentData.paymentId);
-                appointmentData.refundStatus = "initiated";
-                appointmentData.cancelled = true;
-                await appointmentData.save();
+        let slots_booked = doctorData.slots_booked;
 
-                // Release doctor slot
-                if (doctor?.slots_booked[slotDate]) {
-                    doctor.slots_booked[slotDate] = doctor.slots_booked[slotDate].filter((e) => e !== slotTime);
-                    await doctorModel.findByIdAndUpdate(appointmentData.docId, {
-                        slots_booked: doctor.slots_booked,
-                    });
-                }
+        if (slots_booked[slotDate]) {
+            slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime);
 
-                // Send cancellation email (with refund)
-                await transporter.sendMail({
-                    from: process.env.SENDER_EMAIL,
-                    to: userData.email,
-                    subject: "Appointment Cancelled ❌",
-                    html: CANCELLATION_TEMPLATE_USER
-                        .replace("{{name}}", userData.name)
-                        .replace("{{doctorName}}", docData.name)
-                        .replace("{{slotDate}}", slotDate)
-                        .replace("{{slotTime}}", slotTime)
-                        .replace(
-                            "{{refundNote}}",
-                            `<p>Your payment has been refunded and will reflect in your account within 2 working days.</p>`
-                        ),
-                });
-
-                return res.json({
-                    success: true,
-                    message: "Appointment cancelled. Refund initiated.",
-                });
-            } catch (refundError) {
-                console.log("Refund error:", refundError);
-                return res.json({ success: false, message: "Refund failed. Please contact support." });
+            // If no slots left for that date, delete the key
+            if (slots_booked[slotDate].length === 0) {
+                delete slots_booked[slotDate];
             }
         }
 
-        // Doctor already accepted → no refund
-        appointmentData.cancelled = true;
-        await appointmentData.save();
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
-        // Release doctor slot
-        if (doctor?.slots_booked[slotDate]) {
-            doctor.slots_booked[slotDate] = doctor.slots_booked[slotDate].filter((e) => e !== slotTime);
-            await doctorModel.findByIdAndUpdate(appointmentData.docId, {
-                slots_booked: doctor.slots_booked,
-            });
-        }
-
-        // Send cancellation email (no refund)
+        // Send cancellation email
         await transporter.sendMail({
             from: process.env.SENDER_EMAIL,
             to: userData.email,
             subject: "Appointment Cancelled ❌",
             html: CANCELLATION_TEMPLATE_USER
                 .replace("{{name}}", userData.name)
-                .replace("{{doctorName}}", docData.name)
+                .replace("{{doctorName}}", doctorData.name)
                 .replace("{{slotDate}}", slotDate)
                 .replace("{{slotTime}}", slotTime)
-                .replace(
-                    "{{refundNote}}",
-                    `<p>Since the doctor had already accepted the appointment, no refund is applicable.</p>`
-                ),
         });
 
-        return res.json({
-            success: true,
-            message: "Appointment cancelled. No refund as doctor had already accepted.",
-        });
+        res.json({ success: true, message: 'Appointment Cancelled' });
+
     } catch (error) {
         console.log(error);
-        return res.json({ success: false, message: error.message });
+        res.json({ success: false, message: error.message });
     }
 };
+
+
 
 
 // API to make payment of appointment using razorpay
@@ -533,27 +481,23 @@ const paymentRazorpay = async (req, res) => {
 
 // API to verify payment of razorpay
 const verifyRazorpay = async (req, res) => {
-
     try {
-
         const { razorpay_order_id } = req.body
         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
 
         if (orderInfo.status === 'paid') {
             await appointmentModel.findByIdAndUpdate(orderInfo.receipt, { payment: true })
             res.json({ success: true, message: "Payment Successful" })
-        } else {
-            res.json({ success: false, message: "Payment Failed" })
-
         }
-
-
+        else {
+            res.json({ success: false, message: 'Payment Failed' })
+        }
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
     }
-
 }
 
 
-export { registerUser, loginUser, logout, sendResetOtp, resetPassword, getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay }
+
+export { registerUser, loginUser, logout, sendResetOtp, resetPassword, getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay,verifyRazorpay }

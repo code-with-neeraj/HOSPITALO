@@ -384,9 +384,6 @@ export const CANCELLATION_TEMPLATE_USER = `
         <p><span class="icon">⏰</span><strong>{{slotTime}}</strong></p>
       </div>
 
-     <p>Your appointment has been cancelled. Since you had already paid the doctor's fees online and the doctor had accepted the appointment, no refund is applicable.</p>
-     <p>As the doctor did not accept your appointment, your refund has been initiated and will be processed within 2 working days.</p>
-
       <p>If you have any questions or wish to reschedule, feel free to contact us.</p>
       <p>Best regards,<br/><strong>Hospitalo Team</strong></p>
     </div>
@@ -565,9 +562,7 @@ export const CANCELLATION_TEMPLATE_DOCTOR = `
         <p><span class="icon">📅</span>{{slotDate}}</p>
         <p><span class="icon">⏰</span>{{slotTime}}</p>
       </div>
-
-      <p>Since you paid online, your refund has been initiated and will be processed within 2 working days.</p>
-
+      
       <p>If you have any questions or wish to reschedule, feel free to contact us.</p>
       <p>Best regards,<br/><strong>Hospitalo Team</strong></p>
     </div>

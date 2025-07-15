@@ -2,16 +2,11 @@ import doctorModel from "../models/doctorModel.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import appointmentModel from "../models/appointmentModel.js";
-import razorpay from 'razorpay';
 import transporter from "../config/nodemailer.js";
 import userModel from "../models/userModel.js";
 import { CANCELLATION_TEMPLATE_DOCTOR, CONFIRMATION_TEMPLATE_DOCTOR } from "../config/emailTemplates.js";
 
-// Razorpay Instance
-const razorpayInstance = new razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+
 
 // ✅ Change availability
 const changeAvailablity = async (req, res) => {
@@ -105,57 +100,52 @@ const appointmentComplete = async (req, res) => {
 const appointmentCancel = async (req, res) => {
     try {
         const { docId, appointmentId } = req.body;
-        const appointmentData = await appointmentModel.findById(appointmentId);
-        const userData = await userModel.findById(appointmentData.userId);
 
-        if (!appointmentData || appointmentData.docId.toString() !== docId) {
-            return res.json({ success: false, message: 'Cancellation Failed' });
+        const appointmentData = await appointmentModel.findById(appointmentId);
+        if (!appointmentData) {
+            return res.json({ success: false, message: "Appointment not found" });
+        }
+
+        if (appointmentData.docId.toString() !== docId) {
+            return res.json({ success: false, message: "Unauthorized access" });
         }
 
         // Cancel appointment
         await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true });
 
-        // Release doctor slot
+        // Free up the slot (optional)
         const doctorData = await doctorModel.findById(docId);
-        const { slotDate, slotTime } = appointmentData;
+        const userData = await userModel.findById(appointmentData.userId);
+
         let slots_booked = doctorData.slots_booked;
+        const { slotDate, slotTime } = appointmentData;
 
         if (slots_booked[slotDate]) {
             slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime);
-            await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+            if (slots_booked[slotDate].length === 0) delete slots_booked[slotDate];
         }
 
-        // Send email to user
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+
+        // Send cancellation email to user
         await transporter.sendMail({
             from: process.env.SENDER_EMAIL,
             to: userData.email,
             subject: "Appointment Cancelled ❌",
             html: CANCELLATION_TEMPLATE_DOCTOR
                 .replace("{{name}}", userData.name)
-                .replace("{{doctorName}}", appointmentData.docData.name)
-                .replace("{{slotDate}}", appointmentData.slotDate)
-                .replace("{{slotTime}}", appointmentData.slotTime)
+                .replace("{{doctorName}}", doctorData.name)
+                .replace("{{slotDate}}", slotDate)
+                .replace("{{slotTime}}", slotTime)
         });
 
-        // Refund if payment exists
-        if (appointmentData.payment && appointmentData.razorpay_payment_id) {
-            const refund = await razorpayInstance.payments.refund(appointmentData.razorpay_payment_id, {
-                amount: appointmentData.amount * 100
-            });
-
-            return res.json({
-                success: true,
-                message: 'Appointment cancelled. Refund will be processed within 2 working days.',
-                refundDetails: refund
-            });
-        }
-
-        res.json({ success: true, message: 'Appointment cancelled successfully.' });
+        return res.json({ success: true, message: 'Appointment cancelled.' });
     } catch (error) {
         console.log(error);
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
 };
+
 
 // ✅ Doctor Dashboard Summary
 const doctorDashboard = async (req, res) => {

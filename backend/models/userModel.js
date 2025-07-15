@@ -14,13 +14,6 @@ const userSchema = new mongoose.Schema({
     verifyOtpExpireAt: { type: Number, default: 0 },
     resetOtp: { type: String, default: "" },
     resetOtpExpireAt: { type: Number, default: 0 },
-    payment: { type: Boolean, default: false },
-    paymentId: { type: String }, // Razorpay payment ID
-    refundStatus: { type: String, default: "not_initiated" },
-    accepted: { type: Boolean, default: false },
-    cancelled: { type: Boolean, default: false },
-
-
 })
 
 const userModel = mongoose.models.user || mongoose.model('user', userSchema)

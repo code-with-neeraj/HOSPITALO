@@ -1,23 +1,23 @@
-
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+// Create global context
 export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
   const currencySymbol = "₹";
 
+  // Backend API base URL
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const [isLoggedin, setIsLoggedin] = useState(false);
 
+  // Global states
+  const [isLoggedin, setIsLoggedin] = useState(false);
   const [doctors, setDoctors] = useState([]);
-  
-  const [token, setToken] = useState(
-    localStorage.getItem("token") ? localStorage.getItem("token") : ""
-  );
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [userData, setUserData] = useState(false);
 
+  // Fetch list of doctors from backend
   const getDoctorsData = async () => {
     try {
       const { data } = await axios.get(backendUrl + "/api/doctor/list");
@@ -32,10 +32,9 @@ const AppContextProvider = (props) => {
     }
   };
 
-  
+  // Load user profile using stored token
   const loadUserProfileData = async () => {
     try {
-     
       const { data } = await axios.get(backendUrl + "/api/user/get-profile", {
         headers: { token },
       });
@@ -49,7 +48,8 @@ const AppContextProvider = (props) => {
       toast.error(error.message);
     }
   };
- 
+
+  // Values provided to consuming components
   const value = {
     doctors,
     getDoctorsData,
@@ -64,10 +64,12 @@ const AppContextProvider = (props) => {
     setIsLoggedin,
   };
 
+  // Load doctor list on app start
   useEffect(() => {
     getDoctorsData();
   }, []);
 
+  // Load user profile whenever token changes
   useEffect(() => {
     if (token) {
       loadUserProfileData();
