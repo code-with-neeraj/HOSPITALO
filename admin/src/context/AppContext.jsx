@@ -1,11 +1,11 @@
-import { createContext } from "react"; // Import createContext from React
+import { createContext } from "react";
 
 // Create AppContext for global app state
 export const AppContext = createContext();
 
 // AppContextProvider component: provides app-wide utilities and state
 const AppContextProvider = (props) => {
-  // currency: String for currency symbol (Rupee)
+  
   const currency = "₹";
 
   // calculateAge: Calculates age from date of birth (dob)
@@ -46,15 +46,15 @@ const AppContextProvider = (props) => {
 
   // value: Object containing all utilities to provide via context
   const value = {
-    calculateAge, // Function to calculate age
-    slotDateFormat, // Function to format slot date
-    currency, // Currency symbol
+    calculateAge, 
+    slotDateFormat, 
+    currency, 
   };
 
-  // Return the context provider with value
+  
   return (
     <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
   );
 };
 
-export default AppContextProvider; // Export the provider component
+export default AppContextProvider; 
