@@ -3,7 +3,7 @@ import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/userModel.js'
 import transporter from '../config/nodemailer.js'
-import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER } from '../config/emailTemplates.js'
+import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER, PAYMENT_RECEIPT_TEMPLATE } from '../config/emailTemplates.js'
 import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
@@ -482,21 +482,63 @@ const paymentRazorpay = async (req, res) => {
 // API to verify payment of razorpay
 const verifyRazorpay = async (req, res) => {
     try {
-        const { razorpay_order_id } = req.body
-        const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
+        const { razorpay_order_id, razorpay_payment_id } = req.body;
 
-        if (orderInfo.status === 'paid') {
-            await appointmentModel.findByIdAndUpdate(orderInfo.receipt, { payment: true })
-            res.json({ success: true, message: "Payment Successful" })
+        // Fetch the order details from Razorpay
+        const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+        const appointmentId = orderInfo.receipt;
+
+        if (!appointmentId) {
+            return res.json({ success: false, message: "Appointment not found" });
         }
-        else {
-            res.json({ success: false, message: 'Payment Failed' })
+
+        // Get the appointment details
+        const appointment = await appointmentModel.findById(appointmentId);
+        if (!appointment) {
+            return res.json({ success: false, message: "Invalid Appointment" });
         }
+
+        if (orderInfo.status === 'paid' || razorpay_payment_id) {
+            // ✅ Save payment status and Razorpay payment ID
+            await appointmentModel.findByIdAndUpdate(appointmentId, {
+                payment: true,
+                razorpay_payment_id: razorpay_payment_id,
+                refundStatus: 'not_initiated'
+            });
+
+            // ✅ Get user and doctor data
+            const user = await userModel.findById(appointment.userId);
+            const doctor = await doctorModel.findById(appointment.docId);
+
+            // ✅ Import email template
+            const htmlContent = PAYMENT_RECEIPT_TEMPLATE
+                .replace('{{userName}}', user.name)
+                .replace('{{doctorName}}', doctor.name)
+                .replace('{{speciality}}', doctor.speciality)
+                .replace('{{slotDate}}', appointment.slotDate)
+                .replace('{{slotTime}}', appointment.slotTime)
+                .replace('{{amount}}', appointment.amount)
+                .replace('{{paymentId}}', razorpay_payment_id);
+
+            // ✅ Send receipt email
+            await transporter.sendMail({
+                from: process.env.SENDER_EMAIL,
+                to: user.email,
+                subject: "🧾 Payment Receipt - Hospitalo",
+                html: htmlContent
+            });
+
+            return res.json({ success: true, message: "Payment verified and receipt sent" });
+        } else {
+            return res.json({ success: false, message: "Payment not completed" });
+        }
+
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log("verifyRazorpay error:", error);
+        return res.json({ success: false, message: error.message });
     }
-}
+};
+
 
 
 
