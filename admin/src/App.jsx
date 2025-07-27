@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";

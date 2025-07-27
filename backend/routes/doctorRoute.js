@@ -16,4 +16,4 @@ doctorRouter.get('/profile',authDoctor,doctorProfile)
 doctorRouter.post('/update-profile',authDoctor,updateDoctorProfile)
 
 
-export default doctorRouter
+export default doctorRouter;

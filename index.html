@@ -1,0 +1,58 @@
+export const PAYMENT_RECEIPT_TEMPLATE = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Receipt</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #4CAF50;
+    }
+    ul {
+      line-height: 1.6;
+    }
+    .footer {
+      margin-top: 30px;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🧾 Payment Receipt</h2>
+    <p>Hi <strong>{{userName}}</strong>,</p>
+    <p>Your payment has been successfully processed for your appointment.</p>
+
+    <h3>Appointment Summary:</h3>
+    <ul>
+      <li><strong>Doctor:</strong>{{doctorName}} ({{speciality}})</li>
+      <li><strong>Date:</strong> {{slotDate}}</li>
+      <li><strong>Time:</strong> {{slotTime}}</li>
+      <li><strong>Amount Paid:</strong> ₹{{amount}}</li>
+      <li><strong>Payment ID:</strong> {{paymentId}}</li>
+    </ul>
+
+    <p>We look forward to seeing you soon! 🙌</p>
+
+    <div class="footer">
+      Thank you for choosing <strong>Hospitalo</strong>.
+    </div>
+  </div>
+</body>
+</html>
+`;

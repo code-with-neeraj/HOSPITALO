@@ -135,7 +135,6 @@ const appointmentCancel = async (req, res) => {
         const appointmentData = await appointmentModel.findById(appointmentId)
 
       
-
         await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
 
         // releasing doctor slot
@@ -187,4 +186,3 @@ const adminDashboard = async (req, res)=> {
 }
 
 export { addDoctor, loginAdmin, allDoctors, appointmentAdmin, appointmentCancel, adminDashboard }
-

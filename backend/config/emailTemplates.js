@@ -634,5 +634,3 @@ export const PAYMENT_RECEIPT_TEMPLATE = `
 </body>
 </html>
 `;
-
-

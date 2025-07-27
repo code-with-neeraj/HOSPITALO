@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const doctorSchema = new mongoose.Schema({
@@ -19,5 +18,3 @@ const doctorSchema = new mongoose.Schema({
 
 const doctorModel = mongoose.models.doctor || mongoose.model("doctor", doctorSchema);
 export default doctorModel;
-
-
