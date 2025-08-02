@@ -7,6 +7,10 @@ export const AdminContext = createContext();
 
 // AdminContextProvider component: provides admin-related state and functions
 const AdminContextProvider = (props) => {
+
+   // backendUrl: Base URL for backend API
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const [aToken, setAToken] = useState(
     localStorage.getItem("aToken") ? localStorage.getItem("aToken") : ""
   );
@@ -14,8 +18,7 @@ const AdminContextProvider = (props) => {
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
 
-  // backendUrl: Base URL for backend API
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+ 
 
   // getAllDoctors: Fetches all doctors from backend and updates state
   const getAllDoctors = async () => {

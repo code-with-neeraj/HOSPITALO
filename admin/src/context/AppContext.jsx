@@ -5,8 +5,8 @@ export const AppContext = createContext();
 
 // AppContextProvider component: provides app-wide utilities and state
 const AppContextProvider = (props) => {
-  
   const currency = "₹";
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   // calculateAge: Calculates age from date of birth (dob)
   const calculateAge = (dob) => {
@@ -46,12 +46,12 @@ const AppContextProvider = (props) => {
 
   // value: Object containing all utilities to provide via context
   const value = {
-    calculateAge, 
-    slotDateFormat, 
-    currency, 
+    backendUrl,
+    calculateAge,
+    slotDateFormat,
+    currency,
   };
 
-  
   return (
     <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
   );

@@ -5,6 +5,7 @@ import TopDoctors from "../components/TopDoctors";
 import Banner from "../components/Banner";
 
 const Home = () => {
+ 
   // Return the JSX to render the Home page
   return (
     <div>

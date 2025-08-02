@@ -1,8 +1,9 @@
 import React, { useContext, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { AdminContext } from "../../context/AdminContext";
 import { assets } from "../../assets/assets";
+import { AdminContext } from "../../context/AdminContext";
+import { AppContext } from "../../context/AppContext";
 
 // AddDoctor component
 const AddDoctor = () => {
@@ -18,7 +19,9 @@ const AddDoctor = () => {
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
 
-  const { backendUrl, aToken } = useContext(AdminContext);
+  const {backendUrl } = useContext(AppContext);
+  const {aToken } = useContext(AdminContext);
+
 
   // Handle doctor form submission
   const onSubmitHandler = async (event) => {
@@ -58,6 +61,7 @@ const AddDoctor = () => {
         setFees("");
       } else {
         toast.error(data.message);
+        console.log(data);
       }
     } catch (error) {
       toast.error(error.message);
