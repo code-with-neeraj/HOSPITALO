@@ -110,7 +110,7 @@ const DoctorsList = () => {
 
       {/* Modal for Confirmation */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-lg transform transition-all duration-300 ease-in-out scale-100 hover:scale-[1.02]">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Confirm Deletion</h2>
             <p className="text-gray-600 mb-6">Are you sure you want to delete this doctor? This action cannot be undone.</p>
