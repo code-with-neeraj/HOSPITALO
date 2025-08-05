@@ -127,7 +127,7 @@ const AdminContextProvider = (props) => {
     getAllAppointments, 
     cancelAppointment, 
     dashData,
-    getDashData, 
+    getDashData,
   };
 
  

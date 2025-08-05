@@ -17,6 +17,7 @@ const DoctorProfile = () => {
         address: profileData.address,
         fees: profileData.fees,
         available: profileData.available,
+        email: profileData.email
       };
       const { data } = await axios.post(
         backendUrl + "/api/doctor/update-profile",
@@ -63,6 +64,27 @@ const DoctorProfile = () => {
                 {profileData.experience}
               </button>
             </div>
+            <div>
+              <p className="flex items-center gap-1 text-sm font-medium mt-2">
+                <span className="text-gray-800">Email:</span>  <span className="text-gray-600">
+                {isEdit ? (
+                  <input
+                  className="bg-gray-100"
+                    type="email"
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                    value={profileData.email}
+                  />
+                ) : (
+                  profileData.email
+                )}
+              </span>
+              </p>
+            </div>
 
             <div>
               <p className="flex items-center gap-1 text-sm font-medium text-neutral-800 mt-3">
@@ -79,6 +101,7 @@ const DoctorProfile = () => {
                 {currency}{" "}
                 {isEdit ? (
                   <input
+                  className="bg-gray-100"
                     type="number"
                     onChange={(e) =>
                       setProfileData((prev) => ({
@@ -99,6 +122,7 @@ const DoctorProfile = () => {
               <p className="text-sm">
                 {isEdit ? (
                   <input
+                  className="bg-gray-100"
                     type="text"
                     onChange={(e) =>
                       setProfileData((prev) => ({
@@ -114,6 +138,7 @@ const DoctorProfile = () => {
                 <br />
                 {isEdit ? (
                   <input
+                  className="bg-gray-100"
                     type="text"
                     onChange={(e) =>
                       setProfileData((prev) => ({
