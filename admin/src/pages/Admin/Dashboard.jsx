@@ -2,6 +2,8 @@ import React, { useContext, useEffect } from "react";
 import { AdminContext } from "../../context/AdminContext";
 import { AppContext } from "../../context/AppContext";
 import { assets } from "../../assets/assets";
+import { TbListDetails } from "react-icons/tb";
+import { NavLink } from "react-router-dom";
 
 const Dashboard = () => {
   const { aToken, cancelAppointment, dashData, getDashData } = useContext(AdminContext);
@@ -30,6 +32,7 @@ const Dashboard = () => {
               <p className="text-xl font-semibold text-gray-600">{dashData.appointments}</p>
               <p className="text-gray-400">Appointments</p>
             </div>
+            
           </div>
 
           <div className="flex items-center gap-2 bg-white p-4 min-w-52 rounded border-2 border-gray-100 cursor-pointer hover:scale-105 transition-all">
@@ -38,6 +41,10 @@ const Dashboard = () => {
               <p className="text-xl font-semibold text-gray-600">{dashData.patients}</p>
               <p className="text-gray-400">Patients</p>
             </div>
+            <NavLink className="ml-2 p-2 rounded-md bg-gray-100 text-center cursor-pointer hover:scale-110 transition-all" 
+              to={"/user-list"}>
+              <TbListDetails className="text-2xl text-gray-600" />
+            </NavLink>
           </div>
         </div>
 

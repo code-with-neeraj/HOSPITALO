@@ -15,6 +15,7 @@ const AdminContextProvider = (props) => {
     localStorage.getItem("aToken") ? localStorage.getItem("aToken") : ""
   );
   const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
 
@@ -30,7 +31,6 @@ const AdminContextProvider = (props) => {
       );
       if (data.success) {
         setDoctors(data.doctors);
-        console.log(data.doctors);
       } else {
         toast.error(data.message);
       }
@@ -38,6 +38,24 @@ const AdminContextProvider = (props) => {
       toast.error(error.message); 
     }
   };
+
+ // getAllPatients: Fetches all patients from backend
+ const getAllPatients = async () => {
+  try {
+    const { data } = await axios.get(backendUrl + "/api/admin/all-patients", {
+      headers: { aToken },
+    });
+    if (data.success) {
+      setPatients(data.patients);
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    toast.error(error.message); 
+  }
+};
+
+  
 
   // changeAvailability: Changes availability status of a doctor
   const changeAvailability = async (docId) => {
@@ -67,7 +85,6 @@ const AdminContextProvider = (props) => {
       });
       if (data.success) {
         setAppointments(data.appointments); 
-        console.log(data.appointments);
       } else {
         toast.error(data.message); 
       }
@@ -105,7 +122,6 @@ const AdminContextProvider = (props) => {
       });
       if (data.success) {
         setDashData(data.dashData);
-        console.log(data.dashData);
       } else {
         toast.error(data.message); 
       }
@@ -128,6 +144,8 @@ const AdminContextProvider = (props) => {
     cancelAppointment, 
     dashData,
     getDashData,
+    patients,
+    getAllPatients
   };
 
  

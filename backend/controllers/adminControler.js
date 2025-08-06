@@ -110,6 +110,18 @@ const allDoctors = async (req, res) => {
     }
 }
 
+// API to get all patients list for admin panel
+const allPatients = async (req, res) => {
+    try {
+        const patients = await userModel.find({}).select('-password');
+        res.json({ success: true, patients });
+        
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
 // API to delete a doctor
 const deleteDoctor = async (req, res) => {
     try {
@@ -250,4 +262,4 @@ const deleteAppointment = async (req, res) => {
   }
 };
 
-export { addDoctor, loginAdmin, allDoctors, appointmentAdmin, appointmentCancel, adminDashboard , deleteDoctor, deleteAppointment };
+export { addDoctor, loginAdmin, allDoctors, allPatients, appointmentAdmin, appointmentCancel, adminDashboard , deleteDoctor, deleteAppointment };
