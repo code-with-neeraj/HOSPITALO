@@ -1,4 +1,4 @@
-import { createContext, useState } from "react"
+import { createContext, useState, useEffect } from "react"
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -129,6 +129,24 @@ const AdminContextProvider = (props) => {
       toast.error(error.message); 
     }
   };
+
+  // add interceptor to auto-clear admin token on 401
+useEffect(() => {
+  const resInterceptor = axios.interceptors.response.use(
+    (res) => res,
+    (error) => {
+      if (error.response && error.response.status === 401) {
+        setAToken("");
+        localStorage.removeItem("aToken");
+        // optional: clear doctor token as well if you want global logout
+        localStorage.removeItem("dToken");
+        window.location.reload();
+      }
+      return Promise.reject(error);
+    }
+  );
+  return () => axios.interceptors.response.eject(resInterceptor);
+}, [setAToken]);
 
   // value: Object containing all state and functions to provide via context
   const value = {

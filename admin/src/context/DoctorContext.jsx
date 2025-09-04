@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -111,6 +111,24 @@ const DoctorContextProvider = (props) => {
       toast.error(error.message);
     }
   };
+
+  // add interceptor to auto-clear doctor token on 401
+  useEffect(() => {
+  const resInterceptor = axios.interceptors.response.use(
+    (res) => res,
+    (error) => {
+      if (error.response && error.response.status === 401) {
+        setDToken("");
+        localStorage.removeItem("dToken");
+        // optional: clear admin token too if needed
+        // localStorage.removeItem("aToken");
+        window.location.reload();
+      }
+      return Promise.reject(error);
+    }
+  );
+  return () => axios.interceptors.response.eject(resInterceptor);
+  }, [setDToken]);
 
   const value = {
     dToken,

@@ -1,4 +1,5 @@
-import { createContext } from "react";
+import { createContext, useEffect } from "react";
+import axios from "axios";
 
 // Create AppContext for global app state
 export const AppContext = createContext();
@@ -43,6 +44,27 @@ const AppContextProvider = (props) => {
       dateArray[0] + " " + months[Number(dateArray[1])] + " " + dateArray[2]
     );
   };
+
+  // register axios interceptor to handle 401 (token expired)
+  useEffect(() => {
+    const resInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          // clear stored admin/doctor tokens and reload to show login
+          localStorage.removeItem("aToken");
+          localStorage.removeItem("dToken");
+          // optional: clear any in-memory token state via events or reload
+          window.location.reload();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(resInterceptor);
+    };
+  }, []);
 
   // value: Object containing all utilities to provide via context
   const value = {

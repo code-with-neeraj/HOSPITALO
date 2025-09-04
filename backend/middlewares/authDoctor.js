@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 const authDoctor = async (req, res, next) => {
     const { dtoken } = req.headers
     if (!dtoken) {
-        return res.json({ success: false, message: 'Not Authorized Login Again' })
+        return res.status(401).json({ success: false, message: 'Not Authorized Login Again' })
     }
     try {
         const token_decode = jwt.verify(dtoken, process.env.JWT_SECRET)
@@ -13,7 +13,7 @@ const authDoctor = async (req, res, next) => {
         next()
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: error.message })
+        res.status(401).json({ success: false, message: 'Invalid or expired token' })
     }
 }
 

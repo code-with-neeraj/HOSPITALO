@@ -78,6 +78,27 @@ const AppContextProvider = (props) => {
     }
   }, [token]);
 
+  useEffect(() => {
+    // register interceptor once
+    const resInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          // clear client auth and redirect to login
+          localStorage.removeItem("token");
+          setToken("");
+          // optional: clear cookie by calling logout API or reload
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(resInterceptor);
+    };
+  }, []);
+
   return (
     <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
   );
