@@ -16,34 +16,36 @@ const Footer = () => {
   const [sending, setSending] = useState(false);
 
   const submitFeedback = async (e) => {
-    e && e.preventDefault();
+    e?.preventDefault();
     if (!fbMessage.trim()) return toast.warn("Please enter a message");
-
-    // If user not logged in, require name or email
-    if (!token && !fbName.trim() && !fbEmail.trim()) {
-      return toast.warn("Please provide name or email for anonymous feedback");
-    }
 
     try {
       setSending(true);
+
       const payload = { message: fbMessage };
+      // agar user login nahi hai to naam/email bhej do agar diye gaye ho
       if (!token) {
-        payload.name = fbName;
-        payload.email = fbEmail;
+        if (fbName.trim()) payload.name = fbName.trim();
+        if (fbEmail.trim()) payload.email = fbEmail.trim();
       }
-      const headers = token ? { headers: { token } } : {};
-      const { data } = await axios.post(`${backendUrl}/api/user/send-feedback`, payload, headers);
-      if (data.success) {
+
+      const config = token ? { headers: { token } } : {};
+      const { data } = await axios.post(`${backendUrl}/api/user/send-feedback`, payload, config);
+
+      if (data?.success) {
         toast.success(data.message || "Feedback submitted");
+        // OTP example ki tarah email store karna chahe to:
+        if (!token && fbEmail) localStorage.setItem("fb_email", fbEmail);
+        // reset form
         setFbMessage("");
         setFbName("");
         setFbEmail("");
         setShowFeedback(false);
       } else {
-        toast.error(data.message || "Failed to submit feedback");
+        toast.error(data?.message || "Failed to submit feedback");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || "Error sending feedback");
+      toast.error(err?.response?.data?.message || err?.message || "Error sending feedback");
     } finally {
       setSending(false);
     }
