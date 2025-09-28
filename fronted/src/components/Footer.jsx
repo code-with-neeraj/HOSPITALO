@@ -1,9 +1,53 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { assets } from "../assets/assets"; // Image assets
 import { useNavigate } from "react-router-dom"; // For routing
+import axios from "axios";
+import { toast } from "react-toastify";
+import { AppContext } from "../context/AppContext";
 
 const Footer = () => {
   const navigate = useNavigate();
+  const { backendUrl, token } = useContext(AppContext);
+
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [fbName, setFbName] = useState("");
+  const [fbEmail, setFbEmail] = useState("");
+  const [fbMessage, setFbMessage] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const submitFeedback = async (e) => {
+    e && e.preventDefault();
+    if (!fbMessage.trim()) return toast.warn("Please enter a message");
+
+    // If user not logged in, require name or email
+    if (!token && !fbName.trim() && !fbEmail.trim()) {
+      return toast.warn("Please provide name or email for anonymous feedback");
+    }
+
+    try {
+      setSending(true);
+      const payload = { message: fbMessage };
+      if (!token) {
+        payload.name = fbName;
+        payload.email = fbEmail;
+      }
+      const headers = token ? { headers: { token } } : {};
+      const { data } = await axios.post(`${backendUrl}/api/user/send-feedback`, payload, headers);
+      if (data.success) {
+        toast.success(data.message || "Feedback submitted");
+        setFbMessage("");
+        setFbName("");
+        setFbEmail("");
+        setShowFeedback(false);
+      } else {
+        toast.error(data.message || "Failed to submit feedback");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Error sending feedback");
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="md:mx-10">
@@ -20,20 +64,74 @@ const Footer = () => {
         <div>
           <p className="text-xl font-medium mb-5">COMPANY</p>
           <ul className="flex flex-col gap-2 text-gray-600">
-            <li className="cursor-pointer" onClick={() => { navigate("/"); scrollTo(0, 0); }}>Home</li>
-            <li className="cursor-pointer" onClick={() => { navigate("/about"); scrollTo(0, 0); }}>About us</li>
-            <li className="cursor-pointer" onClick={() => { navigate("/contact"); scrollTo(0, 0); }}>Contact us</li>
-            <li className="cursor-pointer" onClick={() => { navigate("/privacy"); scrollTo(0, 0); }}>Privacy policy</li>
+            <li className="cursor-pointer" onClick={() => { navigate("/"); scrollTo(0,0); }}>Home</li>
+            <li className="cursor-pointer" onClick={() => { navigate("/about"); scrollTo(0,0); }}>About us</li>
+            <li className="cursor-pointer" onClick={() => { navigate("/contact"); scrollTo(0,0); }}>Contact us</li>
+            <li className="cursor-pointer" onClick={() => { navigate("/privacy"); scrollTo(0,0); }}>Privacy policy</li>
           </ul>
         </div>
 
-        {/* Right: Contact Info */}
+        {/* Right: Contact + Feedback */}
         <div>
           <p className="text-xl font-medium mb-5">GET IN TOUCH</p>
-          <ul className="flex flex-col gap-2 text-gray-600">
+          <ul className="flex flex-col gap-2 text-gray-600 mb-4">
             <li>+7277959834</li>
             <li>neerajkr145518@gmail.com</li>
           </ul>
+
+          <button
+            onClick={() => setShowFeedback((s) => !s)}
+            className="bg-[#5f6FFF] text-white px-4 py-2 rounded-md"
+          >
+            {showFeedback ? "Close Feedback" : "Send Feedback"}
+          </button>
+
+          {showFeedback && (
+            <form onSubmit={submitFeedback} className="mt-4 p-3 bg-white border rounded shadow-sm text-sm">
+              {!token && (
+                <>
+                  <input
+                    className="w-full mb-2 p-2 border rounded"
+                    type="text"
+                    placeholder="Your name (optional)"
+                    value={fbName}
+                    onChange={(e) => setFbName(e.target.value)}
+                  />
+                  <input
+                    className="w-full mb-2 p-2 border rounded"
+                    type="email"
+                    placeholder="Your email (optional)"
+                    value={fbEmail}
+                    onChange={(e) => setFbEmail(e.target.value)}
+                  />
+                </>
+              )}
+              <textarea
+                className="w-full mb-2 p-2 border rounded"
+                rows="4"
+                placeholder="Write your feedback..."
+                value={fbMessage}
+                onChange={(e) => setFbMessage(e.target.value)}
+                required
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  {sending ? "Sending..." : "Submit"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowFeedback(false); }}
+                  className="px-3 py-2 border rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
 

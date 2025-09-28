@@ -634,3 +634,92 @@ export const PAYMENT_RECEIPT_TEMPLATE = `
 </body>
 </html>
 `;
+
+export const FEEDBACK_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Feedback Received</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f8fa;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .header {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: white;
+      padding: 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 30px;
+      color: #333;
+    }
+    .content h2 {
+      color: #1e293b;
+    }
+    .info {
+      margin: 20px 0;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .info p {
+      margin: 8px 0;
+    }
+    .icon {
+      margin-right: 8px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Hospitalo</h1>
+    </div>
+    <div class="content">
+      <h2>New Feedback Received</h2>
+      <p>Dear Admin,</p>
+      <p>You have received new feedback from a user. Here are the details:</p>
+
+      <div class="info">
+        <p><span class="icon">👤</span><strong>Name:</strong> {{name}}</p>
+        <p><span class="icon">📧</span><strong>Email:</strong> {{email}}</p>
+        <p><span class="icon">📝</span><strong>Feedback:</strong> {{message}}</p>
+        <p><span class="icon">📅</span><strong>Date:</strong> {{date}}</p>
+      </div>
+
+      <p>Best regards,<br/><strong>Hospitalo Team</strong></p>
+    </div>
+    <div class="footer">
+      <p>This is a feedback notification from <br> Hospitalo.</p>
+      <p> &copy; 2025 Hospitalo. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
+`;

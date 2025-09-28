@@ -3,7 +3,7 @@ import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/userModel.js'
 import transporter from '../config/nodemailer.js'
-import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER, PAYMENT_RECEIPT_TEMPLATE } from '../config/emailTemplates.js'
+import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER, PAYMENT_RECEIPT_TEMPLATE, FEEDBACK_TEMPLATE } from '../config/emailTemplates.js'
 import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
@@ -539,7 +539,42 @@ const verifyRazorpay = async (req, res) => {
     }
 };
 
+const sendFeedback = async (req, res) => {
+    try {
+        const { userId, message } = req.body;
+
+        if (!userId && !message) {
+            return res.json({ success: false, message: "Message is required" });
+        }
+
+        const user = await userModel.findById(userId).select('-password');
+
+        if(!user){
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        const adminTo = process.env.SENDER_EMAIL;
+        const html = FEEDBACK_TEMPLATE
+            .replace("{{name}}", user.name || "Anonymous")
+            .replace("{{email}}", user.email || "Not provided")
+            .replace("{{message}}", message)
+            .replace("{{date}}", new Date().toLocaleString());
+
+        await transporter.sendMail({
+            from: process.env.SENDER_EMAIL,
+            to: adminTo,
+            subject: "📝 New Feedback Received",
+            html
+        });
+
+        return res.json({ success: true, message: "Feedback sent successfully" });
+
+    } catch (error) {
+        console.log("sendFeedback error:", error);
+        return res.json({ success: false, message: error.message });
+    }
+}
 
 
 
-export { registerUser, loginUser, logout, sendResetOtp, resetPassword, getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay }
+export { registerUser, loginUser, logout, sendResetOtp, resetPassword, getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay, sendFeedback }
