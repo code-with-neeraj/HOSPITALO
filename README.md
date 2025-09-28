@@ -1,4 +1,3 @@
-
 # 🏥 Hospitalo Project Documentation
 
 > 🚀 Hospitalo is a modern, full-stack hospital management platform designed to streamline healthcare operations. It offers secure authentication, real-time appointment booking, analytics dashboards, online payments, and a beautiful, responsive UI for Admins, Doctors, and Patients.
@@ -9,7 +8,6 @@ This documentation covers the Admin Panel, Backend API, and Frontend Panel, with
 ---
 
 - Live link For User:- https://hospitalo-yjlj.onrender.com/
-
 - Live link For Admin:- https://hospitalo-admin.onrender.com/doctor-appointments
 
 ---
@@ -33,14 +31,15 @@ This documentation covers the Admin Panel, Backend API, and Frontend Panel, with
 
 ## 🚀 Features Overview
 
-- 👨‍⚕️ **Doctor Management**: Add, edit, and manage doctor profiles, specialities, and availability.
-- 📅 **Appointment Oversight**: View, approve, or cancel patient appointments with real-time updates.
-- 📊 **Analytics Dashboard**: Visualize key metrics: total doctors, appointments, and patients.
-- 🔒 **Secure Login**: Separate authentication for Admins and Doctors.
-- ☁️ **Image Upload**: Upload doctor profile images securely.
-- 🩺 **Browse Doctors**: Patients can find and filter doctors by speciality and availability.
-- 💳 **Online Payments**: Securely pay for appointments using integrated payment gateways.
-- 🔔 **Notifications**: Real-time updates for confirmations, reminders, and more.
+- 👨‍⚕️ **Doctor Management**: Add, edit, and manage doctor profiles, specialities, and availability.  
+- 📅 **Appointment Oversight**: View, approve, or cancel patient appointments with real-time updates.  
+- 📊 **Analytics Dashboard**: Visualize key metrics: total doctors, appointments, and patients.  
+- 🔒 **Secure Login**: Separate authentication for Admins and Doctors.  
+- ☁️ **Image Upload**: Upload doctor profile images securely.  
+- 🩺 **Browse Doctors**: Patients can find and filter doctors by speciality and availability.  
+- 💳 **Online Payments**: Securely pay for appointments using integrated payment gateways.  
+- 🔔 **Notifications**: Real-time updates for confirmations, reminders, and more.  
+- ✉️ **Feedback / Contact Support**: Users can send feedback or contact support from the frontend (footer). Supports both authenticated (sends userId) and anonymous feedback (name + email).  
 - 👤 **Profile Management**: Update personal details and manage health information.
 
 ---
@@ -95,15 +94,37 @@ fronted/    # Frontend Panel (React)
   { "success": true, "appointment": { ... } }
   ```
 
+- `POST /send-feedback` — Send feedback / contact support  
+  **Route:** `/api/user/send-feedback` (see router: backend/routes/userRoute.js)  
+  **Description:** Allows users to submit feedback. Works for:
+  - Authenticated users: include header `token` and provide `userId` or backend reads from token. Feedback is saved to user document (if user exists) and emailed to support.
+  - Anonymous users: provide `name`, `email`, and `message`.
+  **Headers:** Optional for anonymous; provide `token` when logged in.  
+  **Request (authenticated):**
+  ```json
+  { "userId": "user_id", "message": "Found a bug in booking flow." }
+  ```
+  **Request (anonymous):**
+  ```json
+  { "name": "Rahul Sharma", "email": "rahul@example.com", "message": "UI is slow on mobile." }
+  ```
+  **Response (success):**
+  ```json
+  { "success": true, "message": "Feedback submitted successfully" }
+  ```
+  **Notes:**
+  - Backend will attempt to send email to SUPPORT_EMAIL (or SENDER_EMAIL) and optionally send an acknowledgement email to the sender if an email address is provided.
+  - In production, long SMTP calls can cause timeouts. The backend can be configured to respond immediately and send email in background or use transactional email APIs (SendGrid/Mailgun) for reliability.
+
 ---
 
 ### 👨‍⚕️ Doctor APIs (`/api/doctor`)
 - `POST /login` — Doctor login  
-- `GET /appointments` — Doctor's appointments (auth)
-- `POST /complete-appointment` — Mark appointment as complete (auth)
-- `POST /cancel-appointment` — Cancel appointment (auth)
-- `GET /dashboard` — Doctor dashboard stats (auth)
-- `GET /profile` — Get doctor profile (auth)
+- `GET /appointments` — Doctor's appointments (auth)  
+- `POST /complete-appointment` — Mark appointment as complete (auth)  
+- `POST /cancel-appointment` — Cancel appointment (auth)  
+- `GET /dashboard` — Doctor dashboard stats (auth)  
+- `GET /profile` — Get doctor profile (auth)  
 - `POST /update-profile` — Update doctor profile (auth)
 
 ---
@@ -119,20 +140,20 @@ fronted/    # Frontend Panel (React)
   { "success": true, "token": "admin_jwt_token" }
   ```
 
-- `POST /add-doctor` — Add a new doctor (auth, file upload)
-- `POST /all-doctors` — List all doctors (auth)
-- `POST /change-availability` — Change doctor availability (auth)
-- `GET /appointments` — List all appointments (auth)
-- `POST /cancel-appointment` — Cancel appointment (auth)
+- `POST /add-doctor` — Add a new doctor (auth, file upload)  
+- `POST /all-doctors` — List all doctors (auth)  
+- `POST /change-availability` — Change doctor availability (auth)  
+- `GET /appointments` — List all appointments (auth)  
+- `POST /cancel-appointment` — Cancel appointment (auth)  
 - `GET /dashboard` — Admin dashboard stats (auth)
 
 ---
 
 ## 🎨 UI Highlights
 
-- **Modern, responsive design** with TailwindCSS
-- **Colorful icons** for intuitive navigation
-- **Sidebar and navbar** for easy access to all features
+- **Modern, responsive design** with TailwindCSS  
+- **Colorful icons** for intuitive navigation  
+- **Sidebar and navbar** for easy access to all features  
 - **Real-time feedback** and notifications
 
 ---
@@ -145,4 +166,4 @@ For support or feedback, contact:
 
 ---
 
-> _Empowering healthcare
+> _Empowering healthcare_
