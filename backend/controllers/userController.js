@@ -2,7 +2,7 @@ import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/userModel.js'
 import transporter from '../config/nodemailer.js'
-import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER, PAYMENT_RECEIPT_TEMPLATE, FEEDBACK_TEMPLATE, FEEDBACK_ACK_TEMPLATE } from '../config/emailTemplates.js'
+import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER, PAYMENT_RECEIPT_TEMPLATE, FEEDBACK_TEMPLATE } from '../config/emailTemplates.js'
 import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
@@ -540,57 +540,30 @@ const verifyRazorpay = async (req, res) => {
 
 const sendFeedback = async (req, res) => {
     try {
-        const { userId, name, email, message } = req.body;
+        const { userId, message } = req.body;
 
-        if (!message || (!email && !userId && !name)) {
-            return res.json({ success: false, message: "Message and contact info (email or userId or name) are required" });
+        if (!userId || !message) {
+            return res.json({ success: false, message: "userId and message are required" });
         }
 
-        // try to fetch user if userId provided
-        let user;
-        if (userId) {
-            user = await userModel.findById(userId).select('-password');
+        const user = await userModel.findById(userId).select('-password');
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
         }
 
-        const senderName = (user && user.name) || name || 'Anonymous';
-        const senderEmail = (user && user.email) || email || '';
-
-        // Save feedback on user document if user exists
-        if (user) {
-            await userModel.findByIdAndUpdate(
-                userId,
-                { $push: { feedbacks: { message, date: Date.now() } } },
-                { new: true }
-            );
-        }
-
-        // Email to site admin/support using template
         const adminTo = process.env.SUPPORT_EMAIL || process.env.SENDER_EMAIL;
-        const adminHtml = FEEDBACK_TEMPLATE
-            .replace('{{name}}', senderName)
-            .replace('{{email}}', senderEmail || 'Not provided')
+        const html = FEEDBACK_TEMPLATE
+            .replace('{{name}}', user.name || 'Anonymous')
+            .replace('{{email}}', user.email || 'Not provided')
             .replace('{{message}}', message.replace(/\n/g, '<br/>'))
             .replace('{{date}}', new Date().toLocaleString());
 
         await transporter.sendMail({
             from: process.env.SENDER_EMAIL,
             to: adminTo,
-            subject: `New Feedback from ${senderName}`,
-            html: adminHtml
+            subject: `New Feedback from ${user.name || 'User'}`,
+            html
         });
-
-        // Acknowledgement email to user (if email provided) using template
-        if (senderEmail) {
-            const ackHtml = FEEDBACK_ACK_TEMPLATE
-                .replace('{{name}}', senderName)
-                .replace('{{message}}', message.replace(/\n/g, '<br/>'));
-            await transporter.sendMail({
-                from: process.env.SENDER_EMAIL,
-                to: senderEmail,
-                subject: "Thanks for your feedback — Hospitalo",
-                html: ackHtml
-            });
-        }
 
         return res.json({ success: true, message: "Feedback submitted successfully" });
     } catch (error) {

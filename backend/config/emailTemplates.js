@@ -645,11 +645,3 @@ export const FEEDBACK_TEMPLATE = `
   <p>Received at: {{date}}</p>
 `;
 
-export const FEEDBACK_ACK_TEMPLATE = `
-  <p>Hi {{name}},</p>
-  <p>Thank you for your feedback! We appreciate you taking the time to help us improve Hospitalo.</p>
-  <p>Here's a copy of your message:</p>
-  <blockquote>{{message}}</blockquote>
-  <p>We will review it and get back to you if needed.</p>
-  <p>— The Hospitalo Team</p>
-`;
