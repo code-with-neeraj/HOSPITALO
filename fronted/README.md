@@ -22,6 +22,9 @@ This is the user-facing web application for booking doctor appointments, managin
 - 🔔 **Notifications**  
   Get real-time updates for appointment confirmations, reminders, and more.
 
+- ✉️ **Feedback / Contact Support**  
+  Users can send feedback or contact support directly from the footer. Supports both authenticated (sends userId) and anonymous feedback (name + email).
+
 - 🌐 **Responsive Design**  
   Enjoy a seamless experience on desktop, tablet, and mobile devices.
 
@@ -81,6 +84,54 @@ fronted/
 
 ---
 
+## 📨 Feedback / Contact Support (Footer)
+
+- Location: Footer component includes a "Send Feedback" button which opens a small form.
+- Behavior:
+  - If user is logged in: the frontend sends the stored `token` header and request includes `userId`.
+  - If anonymous: the form accepts `name` and `email` along with the `message`.
+
+- Endpoint (frontend uses VITE_BACKEND_URL):
+  ```
+  POST ${VITE_BACKEND_URL}/api/user/send-feedback
+  ```
+
+- Request body examples:
+
+  - Authenticated user:
+    ```json
+    {
+      "userId": "64a1b2c3d4e5f67890ab1234",
+      "message": "Found a bug in booking flow."
+    }
+    ```
+
+  - Anonymous:
+    ```json
+    {
+      "name": "Rahul kumar",
+      "email": "rahul@example.com",
+      "message": "UI is slow on mobile."
+    }
+    ```
+
+- Headers:
+  - Content-Type: application/json
+  - When logged in: `token: <JWT_TOKEN>` (AppContext sends this automatically)
+
+- Notes for production:
+  - The backend may send emails using SMTP. Production hosts sometimes block outbound SMTP or cause delays — the backend should respond immediately while sending email in background to avoid frontend timeouts.
+  - If you see timeouts in production, verify backend env vars: SENDER_EMAIL, SENDER_PASSWORD (or use transactional email API like SendGrid), and ensure VITE_BACKEND_URL points to your live API.
+
+- Troubleshooting:
+  - If feedback form hangs in production:
+    - Check browser Network tab for request URL and response status.
+    - Verify VITE_BACKEND_URL is set correctly in the deployed frontend.
+    - Inspect backend logs for SMTP ETIMEDOUT errors.
+    - Consider switching the backend to background-send or use an email API.
+
+---
+
 ## 🎨 UI Highlights
 
 - **Modern, responsive design** with TailwindCSS
@@ -98,4 +149,4 @@ For support or feedback, contact:
 
 ---
 
-> _Empowering your healthcare
+> _Empowering your healthcare_

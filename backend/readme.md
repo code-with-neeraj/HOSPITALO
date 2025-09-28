@@ -69,8 +69,7 @@ backend/
 ## 📡 API Endpoints & Examples
 
 ### 👤 User APIs (`/api/user`)
-
-- **POST /register** — Register a new user  
+- `POST /register` — Register a new user  
   **Request:**  
   ```json
   { "name": "John Doe", "email": "john@example.com", "password": "yourpassword" }
@@ -80,7 +79,7 @@ backend/
   { "success": true, "token": "jwt_token_here", "user": { "id": "user_id", "name": "John Doe", "email": "john@example.com" } }
   ```
 
-- **POST /login** — User login  
+- `POST /login` — User login  
   **Request:**  
   ```json
   { "email": "john@example.com", "password": "yourpassword" }
@@ -90,14 +89,14 @@ backend/
   { "success": true, "token": "jwt_token_here" }
   ```
 
-- **GET /get-profile** — Get user profile (auth required)  
+- `GET /get-profile` — Get user profile (auth required)  
   **Headers:** `{ token: <jwt_token> }`  
   **Response:**  
   ```json
   { "success": true, "userData": { ... } }
   ```
 
-- **POST /book-appointment** — Book an appointment (auth)  
+- `POST /book-appointment` — Book an appointment (auth)  
   **Request:**  
   ```json
   { "doctorId": "doctor_id", "date": "2024-06-10", "time": "10:00" }
@@ -106,6 +105,40 @@ backend/
   ```json
   { "success": true, "appointment": { "id": "appointment_id", "doctorId": "doctor_id", "userId": "user_id", "date": "2024-06-10", "time": "10:00" } }
   ```
+
+- `POST /send-feedback` — Send feedback / contact support  
+  **Route:** `/api/user/send-feedback` (see router: [backend/routes/userRoute.js](backend/routes/userRoute.js))  
+  **Controller:** [`sendFeedback`](backend/controllers/userController.js)  
+  **Description:** Allow authenticated users to submit feedback (saved to user.feedbacks and emailed to support). Anonymous feedback is also accepted (provide name/email).  
+  **Headers:** Optional for anonymous; provide `token` header when logged in.  
+  **Request (logged-in user):**
+  ```json
+  { "userId": "user_id", "message": "App feedback text" }
+  ```
+  **Request (anonymous):**
+  ```json
+  { "name": "Your Name", "email": "you@example.com", "message": "Feedback text" }
+  ```
+  **Response (success):**
+  ```json
+  { "success": true, "message": "Feedback submitted successfully" }
+  ```
+  **Notes:**
+  - Endpoint is protected by [`authUser`](backend/middlewares/authUser.js) when used with a token; anonymous usage does not require auth but must include name/email.
+  - The controller will push feedback into the user document when `userId` is provided and send an email to support (see [`sendFeedback`](backend/controllers/userController.js)).
+  - Example curl (authenticated):
+    ```bash
+    curl -X POST http://localhost:4000/api/user/send-feedback \
+      -H "Content-Type: application/json" \
+      -H "token: <your_jwt_token>" \
+      -d '{"message":"Found a bug in booking flow","userId":"<user_id>"}'
+    ```
+  - Example curl (anonymous):
+    ```bash
+    curl -X POST http://localhost:4000/api/user/send-feedback \
+      -H "Content-Type: application/json" \
+      -d '{"name":"Anon","email":"anon@example.com","message":"General feedback..."}'
+    ```
 
 ---
 
