@@ -539,7 +539,74 @@ const verifyRazorpay = async (req, res) => {
     }
 };
 
+const sendFeedback = async (req, res) => {
+    try {
+        const { userId, name, email, message } = req.body;
+
+        if (!message || (!email && !userId && !name)) {
+            return res.json({ success: false, message: "Message and contact info (email or userId or name) are required" });
+        }
+
+        // try to fetch user if userId provided
+        let user;
+        if (userId) {
+            user = await userModel.findById(userId).select('-password');
+        }
+
+        const senderName = (user && user.name) || name || 'Anonymous';
+        const senderEmail = (user && user.email) || email || '';
+
+        // Save feedback on user document if user exists
+        if (user) {
+            await userModel.findByIdAndUpdate(
+                userId,
+                { $push: { feedbacks: { message, date: Date.now() } } },
+                { new: true }
+            );
+        }
+
+        // Email to site admin/support
+        const adminTo = process.env.SUPPORT_EMAIL || process.env.SENDER_EMAIL;
+        await transporter.sendMail({
+            from: process.env.SENDER_EMAIL,
+            to: adminTo,
+            subject: `New Feedback from ${senderName}`,
+            html: `
+                <h3>New Feedback Received</h3>
+                <p><strong>Name:</strong> ${senderName}</p>
+                <p><strong>Email:</strong> ${senderEmail || 'Not provided'}</p>
+                <p><strong>Message:</strong></p>
+                <p>${message.replace(/\n/g, '<br/>')}</p>
+                <hr/>
+                <p>Received at: ${new Date().toLocaleString()}</p>
+            `
+        });
+
+        // Acknowledgement email to user (if email provided)
+        if (senderEmail) {
+            await transporter.sendMail({
+                from: process.env.SENDER_EMAIL,
+                to: senderEmail,
+                subject: "Thanks for your feedback — Hospitalo",
+                html: `
+                    <p>Hi ${senderName},</p>
+                    <p>Thank you for your feedback! We appreciate you taking the time to help us improve Hospitalo.</p>
+                    <p>Here's a copy of your message:</p>
+                    <blockquote>${message.replace(/\n/g, '<br/>')}</blockquote>
+                    <p>We will review it and get back to you if needed.</p>
+                    <p>— The Hospitalo Team</p>
+                `
+            });
+        }
+
+        return res.json({ success: true, message: "Feedback submitted successfully" });
+    } catch (error) {
+        console.log("sendFeedback error:", error);
+        return res.json({ success: false, message: error.message });
+    }
+};
 
 
 
-export { registerUser, loginUser, logout, sendResetOtp, resetPassword, getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay }
+
+export { registerUser, loginUser, logout, sendResetOtp, resetPassword, getProfile, updateProfile, bookAppointment, listAppintment, cancelAppointment, paymentRazorpay, verifyRazorpay, sendFeedback }
