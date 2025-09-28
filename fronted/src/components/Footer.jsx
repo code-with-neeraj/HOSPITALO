@@ -7,49 +7,49 @@ import { AppContext } from "../context/AppContext";
 
 const Footer = () => {
   const navigate = useNavigate();
-  const { backendUrl, token } = useContext(AppContext);
+  // const { backendUrl, token } = useContext(AppContext);
 
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [fbName, setFbName] = useState("");
-  const [fbEmail, setFbEmail] = useState("");
-  const [fbMessage, setFbMessage] = useState("");
-  const [sending, setSending] = useState(false);
+  // const [showFeedback, setShowFeedback] = useState(false);
+  // const [fbName, setFbName] = useState("");
+  // const [fbEmail, setFbEmail] = useState("");
+  // const [fbMessage, setFbMessage] = useState("");
+  // const [sending, setSending] = useState(false);
 
-  const submitFeedback = async (e) => {
-    e?.preventDefault();
-    if (!fbMessage.trim()) return toast.warn("Please enter a message");
+  // const submitFeedback = async (e) => {
+  //   e?.preventDefault();
+  //   if (!fbMessage.trim()) return toast.warn("Please enter a message");
 
-    try {
-      setSending(true);
+  //   try {
+  //     setSending(true);
 
-      const payload = { message: fbMessage };
-      // agar user login nahi hai to naam/email bhej do agar diye gaye ho
-      if (!token) {
-        if (fbName.trim()) payload.name = fbName.trim();
-        if (fbEmail.trim()) payload.email = fbEmail.trim();
-      }
+  //     const payload = { message: fbMessage };
+  //     // agar user login nahi hai to naam/email bhej do agar diye gaye ho
+  //     if (!token) {
+  //       if (fbName.trim()) payload.name = fbName.trim();
+  //       if (fbEmail.trim()) payload.email = fbEmail.trim();
+  //     }
 
-      const config = token ? { headers: { token } } : {};
-      const { data } = await axios.post(`${backendUrl}/api/user/send-feedback`, payload, config);
+  //     const config = token ? { headers: { token } } : {};
+  //     const { data } = await axios.post(`${backendUrl}/api/user/send-feedback`, payload, config);
 
-      if (data?.success) {
-        toast.success(data.message || "Feedback submitted");
-        // OTP example ki tarah email store karna chahe to:
-        if (!token && fbEmail) localStorage.setItem("fb_email", fbEmail);
-        // reset form
-        setFbMessage("");
-        setFbName("");
-        setFbEmail("");
-        setShowFeedback(false);
-      } else {
-        toast.error(data?.message || "Failed to submit feedback");
-      }
-    } catch (err) {
-      toast.error(err?.response?.data?.message || err?.message || "Error sending feedback");
-    } finally {
-      setSending(false);
-    }
-  };
+  //     if (data?.success) {
+  //       toast.success(data.message || "Feedback submitted");
+  //       // OTP example ki tarah email store karna chahe to:
+  //       if (!token && fbEmail) localStorage.setItem("fb_email", fbEmail);
+  //       // reset form
+  //       setFbMessage("");
+  //       setFbName("");
+  //       setFbEmail("");
+  //       setShowFeedback(false);
+  //     } else {
+  //       toast.error(data?.message || "Failed to submit feedback");
+  //     }
+  //   } catch (err) {
+  //     toast.error(err?.response?.data?.message || err?.message || "Error sending feedback");
+  //   } finally {
+  //     setSending(false);
+  //   }
+  // };
 
   return (
     <div className="md:mx-10">
@@ -81,7 +81,7 @@ const Footer = () => {
             <li>neerajkr145518@gmail.com</li>
           </ul>
 
-          <button
+          {/* <button
             onClick={() => setShowFeedback((s) => !s)}
             className="bg-[#5f6FFF] text-white px-4 py-2 rounded-md"
           >
@@ -133,7 +133,7 @@ const Footer = () => {
                 </button>
               </div>
             </form>
-          )}
+          )} */}
         </div>
       </div>
 
