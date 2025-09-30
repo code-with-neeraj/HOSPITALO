@@ -2,14 +2,13 @@
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/userModel.js'
-import transporter from '../config/nodemailer.js'
-import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER, PAYMENT_RECEIPT_TEMPLATE, FEEDBACK_TEMPLATE } from '../config/emailTemplates.js'
+import sendWithBrevo from '../utils/sendWithBrevo.js'
 import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
 import razorpay from 'razorpay'
-import sendWithBrevo from '../utils/sendWithBrevo.js'
+import { PASSWORD_RESET_TEMPLATE, CONFIRMATION_TEMPLATE_USER, CANCELLATION_TEMPLATE_USER, PAYMENT_RECEIPT_TEMPLATE, FEEDBACK_TEMPLATE } from '../config/emailTemplates.js'
 
 
 const razorpayInstance = new razorpay({
@@ -67,14 +66,17 @@ const registerUser = async (req, res) => {
         })
 
         // Sending welcome email
-        const mailOptions = {
-            from: process.env.SENDER_EMAIL,
-            to: user.email,
-            subject: 'Welcome to Hospitalo',
-            text: `Welcome to Hospitalo website. Your account has been created with email id: ${email}`
+        try {
+            await sendWithBrevo({
+                to: user.email,
+                subject: 'Welcome to Hospitalo',
+                text: `Welcome to Hospitalo website. Your account has been created with email id: ${email}`,
+                senderName: 'HOSPITALO'
+            });
+        } catch (mailErr) {
+            console.error('Brevo API send error:', mailErr?.response?.data || mailErr.message);
+            return res.json({ success: false, message: 'Failed to send email', error: mailErr?.message });
         }
-
-        await transporter.sendMail(mailOptions);
 
         res.json({ success: true, token })
 
@@ -170,15 +172,17 @@ const sendResetOtp = async (req, res) => {
 
         await user.save()
 
-        const mailOption = {
-            from: process.env.SENDER_EMAIL,
-            to: user.email,
-            subject: 'Password Reset OTP',
-            // text: `Your OTP for resetting your password is ${otp}. Use this OTP to proceed with resetting your password.`,
-            html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email)
+        try {
+            await sendWithBrevo({
+                to: user.email,
+                subject: 'Password Reset OTP',
+                html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email),
+                senderName: 'HOSPITALO'
+            });
+        } catch (mailErr) {
+            console.error('Brevo API send error:', mailErr?.response?.data || mailErr.message);
+            return res.json({ success: false, message: 'Failed to send email', error: mailErr?.message });
         }
-
-        await transporter.sendMail(mailOption);
 
         return res.json({ success: true, message: "OTP sent to your email" });
 
@@ -352,17 +356,21 @@ const bookAppointment = async (req, res) => {
         await doctorModel.findByIdAndUpdate(docId, { slots_booked })
 
         // Send appointment confirmation email
-        await transporter.sendMail({
-            from: process.env.SENDER_EMAIL,
-            to: userData.email,
-            subject: "Appointment Confirmed",
-            html: CONFIRMATION_TEMPLATE_USER
-                .replace("{{name}}", userData.name)
-                .replace("{{doctorName}}", docData.name)
-                .replace("{{slotDate}}", slotDate)
-                .replace("{{slotTime}}", slotTime)
-        });
-
+        try {
+            await sendWithBrevo({
+                to: userData.email,
+                subject: "Appointment Confirmed ✅",
+                html: CONFIRMATION_TEMPLATE_USER
+                    .replace("{{name}}", userData.name)
+                    .replace("{{doctorName}}", docData.name)
+                    .replace("{{slotDate}}", slotDate)
+                    .replace("{{slotTime}}", slotTime),
+                senderName: 'HOSPITALO'
+            });
+        } catch (mailErr) {
+            console.error('Brevo API send error:', mailErr?.response?.data || mailErr.message);
+            return res.json({ success: false, message: 'Failed to send email', error: mailErr?.message });
+        }
 
         res.json({ success: true, message: 'Appointment Booked' })
 
@@ -427,16 +435,21 @@ const cancelAppointment = async (req, res) => {
         await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
         // Send cancellation email
-        await transporter.sendMail({
-            from: process.env.SENDER_EMAIL,
-            to: userData.email,
-            subject: "Appointment Cancelled ❌",
-            html: CANCELLATION_TEMPLATE_USER
-                .replace("{{name}}", userData.name)
-                .replace("{{doctorName}}", doctorData.name)
-                .replace("{{slotDate}}", slotDate)
-                .replace("{{slotTime}}", slotTime)
-        });
+        try {
+            await sendWithBrevo({
+                to: userData.email,
+                subject: "Appointment Cancelled ❌",
+                html: CANCELLATION_TEMPLATE_USER
+                    .replace("{{name}}", userData.name)
+                    .replace("{{doctorName}}", doctorData.name)
+                    .replace("{{slotDate}}", slotDate)
+                    .replace("{{slotTime}}", slotTime),
+                senderName: 'HOSPITALO'
+            });
+        } catch (mailErr) {
+            console.error('Brevo API send error:', mailErr?.response?.data || mailErr.message);
+            return res.json({ success: false, message: 'Failed to send email', error: mailErr?.message });
+        }
 
         res.json({ success: true, message: 'Appointment Cancelled' });
 
@@ -522,12 +535,17 @@ const verifyRazorpay = async (req, res) => {
                 .replace('{{paymentId}}', razorpay_payment_id);
 
             // ✅ Send receipt email
-            await transporter.sendMail({
-                from: process.env.SENDER_EMAIL,
-                to: user.email,
-                subject: "🧾 Payment Receipt - Hospitalo",
-                html: htmlContent
-            });
+            try {
+                await sendWithBrevo({
+                    to: user.email,
+                    subject: "🧾 Payment Receipt - Hospitalo",
+                    html: htmlContent,
+                    senderName: 'HOSPITALO'
+                });
+            } catch (mailErr) {
+                 console.error('Brevo API send error:', mailErr?.response?.data || mailErr.message);
+                return res.json({ success: false, message: 'Failed to send email', error: mailErr?.message });
+            }
 
             return res.json({ success: true, message: "Payment verified and receipt sent" });
         } else {

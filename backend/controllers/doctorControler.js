@@ -1,8 +1,9 @@
+
 import doctorModel from "../models/doctorModel.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import appointmentModel from "../models/appointmentModel.js";
-import transporter from "../config/nodemailer.js";
+import sendWithBrevo from '../utils/sendWithBrevo.js'
 import userModel from "../models/userModel.js";
 import { CANCELLATION_TEMPLATE_DOCTOR, CONFIRMATION_TEMPLATE_DOCTOR } from "../config/emailTemplates.js";
 
@@ -75,16 +76,22 @@ const appointmentComplete = async (req, res) => {
             await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true });
 
             // Send email to user
-            await transporter.sendMail({
-                from: process.env.SENDER_EMAIL,
-                to: userData.email,
-                subject: "Appointment Confirmed 🏁",
-                html: CONFIRMATION_TEMPLATE_DOCTOR
-                    .replace("{{name}}", userData.name)
-                    .replace("{{doctorName}}", appointmentData.docData.name)
-                    .replace("{{slotDate}}", appointmentData.slotDate)
-                    .replace("{{slotTime}}", appointmentData.slotTime)
-            });
+
+            try {
+                await sendWithBrevo({
+                    to: userData.email,
+                    subject: "Appointment Confirmed 🏁",
+                    html: CONFIRMATION_TEMPLATE_DOCTOR
+                        .replace("{{name}}", userData.name)
+                        .replace("{{doctorName}}", appointmentData.docData.name)
+                        .replace("{{slotDate}}", appointmentData.slotDate)
+                        .replace("{{slotTime}}", appointmentData.slotTime),
+                    senderName: 'HOSPITALO'
+                });
+            } catch (mailErr) {
+                console.error('Brevo API send error:', mailErr?.response?.data || mailErr.message);
+                 return res.json({ success: false, message: 'Failed to send email', error: mailErr?.message });
+            }
 
             return res.json({ success: true, message: 'Appointment completed' });
         } else {
@@ -128,16 +135,21 @@ const appointmentCancel = async (req, res) => {
         await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
         // Send cancellation email to user
-        await transporter.sendMail({
-            from: process.env.SENDER_EMAIL,
-            to: userData.email,
-            subject: "Appointment Cancelled ❌",
-            html: CANCELLATION_TEMPLATE_DOCTOR
-                .replace("{{name}}", userData.name)
-                .replace("{{doctorName}}", doctorData.name)
-                .replace("{{slotDate}}", slotDate)
-                .replace("{{slotTime}}", slotTime)
-        });
+        try {
+            await sendWithBrevo({
+                to: userData.email,
+                subject: "Appointment Cancelled ❌",
+                html: CANCELLATION_TEMPLATE_DOCTOR
+                    .replace("{{name}}", userData.name)
+                    .replace("{{doctorName}}", doctorData.name)
+                    .replace("{{slotDate}}", slotDate)
+                    .replace("{{slotTime}}", slotTime),
+                senderName: 'HOSPITALO'
+            });
+        } catch (mailErr) {
+            console.error('Brevo API send error:', mailErr?.response?.data || mailErr.message);
+            return res.json({ success: false, message: 'Failed to send email', error: mailErr?.message });
+        }
 
         return res.json({ success: true, message: 'Appointment cancelled.' });
     } catch (error) {
