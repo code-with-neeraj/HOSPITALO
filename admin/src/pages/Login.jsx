@@ -12,6 +12,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const { setAToken, backendUrl } = useContext(AdminContext);
   const { setDToken } = useContext(DoctorContext);
@@ -21,6 +22,7 @@ const Login = () => {
     event.preventDefault();
 
     try {
+      setSending(true);
       if (state === "Admin") {
         const { data } = await axios.post(backendUrl + "/api/admin/login", {
           email,
@@ -47,6 +49,8 @@ const Login = () => {
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -86,7 +90,7 @@ const Login = () => {
           </button>
         </div>
         <button className="bg-[#5f6FFF] text-white w-full py-2 rounded-md text-base">
-          Login
+          {sending ? "Loggin..." : "Login"}
         </button>
         {state === "Admin" ? (
           <p>

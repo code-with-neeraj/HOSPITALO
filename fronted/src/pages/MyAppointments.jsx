@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
+  const [sending, setSending] = useState(false);
   const navigate = useNavigate();
 
   const months = [
@@ -21,6 +22,7 @@ const MyAppointments = () => {
 
   const getUserAppointments = async () => {
     try {
+      setSending(true);
       const { data } = await axios.get(`${backendUrl}/api/user/appointments`, {
         headers: { token },
       });
@@ -29,11 +31,14 @@ const MyAppointments = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setSending(false);
     }
   };
 
   const cancelAppointment = async (appointmentId) => {
     try {
+      setSending(true);
       const { data } = await axios.post(
         `${backendUrl}/api/user/cancel-appointment`,
         { appointmentId },
@@ -48,6 +53,8 @@ const MyAppointments = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -95,6 +102,7 @@ const MyAppointments = () => {
 
   const appointmentRazorpay = async (appointmentId) => {
     try {
+      setSending(true);
       const { data } = await axios.post(
         `${backendUrl}/api/user/payment-razorpay`,
         { appointmentId },
@@ -106,6 +114,8 @@ const MyAppointments = () => {
     } catch (error) {
       console.log(error);
       toast.error("Razorpay initialization failed");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -152,6 +162,7 @@ const MyAppointments = () => {
                   className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-[#5f6FFF] hover:text-white transition-all duration-300"
                 >
                   Pay Online
+                  {sending && <span className="spinner-border spinner-border-sm">...</span>}
                 </button>
               )}
               {!item.cancelled && !item.isCompleted && (
@@ -160,6 +171,7 @@ const MyAppointments = () => {
                   className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300"
                 >
                   Cancel appointment
+                  {sending && <span className="spinner-border spinner-border-sm">...</span>}
                 </button>
               )}
               {item.cancelled && !item.isCompleted && (

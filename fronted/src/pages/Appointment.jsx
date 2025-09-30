@@ -22,6 +22,7 @@ const Appointment = () => {
   const [slotIndex, setSlotIndex] = useState(0);
   // State to track which time slot is selected (string)
   const [slotTime, setSlotTime] = useState("");
+  const [sending, setSending] = useState(false);
 
   // Function to find and set the selected doctor's info from the doctors array
   const fetchDocInfo = async () => {
@@ -105,6 +106,7 @@ const Appointment = () => {
     }
 
     try {
+      setSending(true);
       const date = docSlots[slotIndex][0].datetime;
 
       let day = date.getDate();
@@ -128,6 +130,8 @@ const Appointment = () => {
     } catch (error) {
       console.log(error);
       toast.error(error.message);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -231,7 +235,7 @@ const Appointment = () => {
             onClick={bookAppointment}
             className="bg-[#5f6FFF] hover:opacity-75 cursor-pointer text-white text-sm font-light px-14 py-3 rounded-full my-6"
           >
-            Book an appointment
+            {sending ? "Booking..." : "Book an appointment"}
           </button>
         </div>
 

@@ -16,11 +16,13 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
     try {
+      setSending(true);
       if (state === "Sign Up") {
         const { data } = await axios.post(backendUrl + "/api/user/register", {
           name,
@@ -47,6 +49,8 @@ const Login = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -126,6 +130,7 @@ const Login = () => {
           className="bg-[#5f6FFF] hover:opacity-85 cursor-pointer text-white w-full py-2 rounded-md text-base"
         >
           {state === "Sign Up" ? "Create Account" : "Login"}
+          {sending && <span className="spinner-border spinner-border-sm">...</span>}
         </button>
         {state === "Sign Up" ? (
           <p>

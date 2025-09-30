@@ -3,22 +3,27 @@ import { assets } from "../assets/assets";
 import { AdminContext } from "../context/AdminContext";
 import { useNavigate } from "react-router-dom";
 import { DoctorContext } from "../context/DoctorContext";
+import { useState } from "react";
 
 // Navbar component for displaying the top navigation bar with logout functionality
 const Navbar = () => {
   const { aToken, setAToken } = useContext(AdminContext);
   const { dToken, setDToken } = useContext(DoctorContext);
+  const [sending, setSending] = useState(false);
+
 
   const navigate = useNavigate();
 
   // logoutHandler: Logs out the user by clearing tokens, localStorage, and navigating to home
   const logoutHandler = () => {
+    setSending(true);
     navigate("/"); // Navigate to home page
     aToken && setAToken(""); 
     aToken && localStorage.removeItem("aToken");
     dToken && setDToken("");
     dToken && localStorage.removeItem("dToken");
     window.location.reload(); 
+    setSending(false);
   };
 
   // Render the navigation bar
@@ -39,6 +44,7 @@ const Navbar = () => {
         className="bg-[#5f6FFF] hover:opacity-75 cursor-pointer text-white text-sm px-10 py-2 rounded-full"
       >
         Logout
+        {sending && <span className="spinner-border spinner-border-sm">...</span>}
       </button>
     </div>
   );
