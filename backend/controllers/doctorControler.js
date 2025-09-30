@@ -80,7 +80,7 @@ const appointmentComplete = async (req, res) => {
             try {
                 await sendWithBrevo({
                     to: userData.email,
-                    subject: "Appointment Confirmed 🏁",
+                    subject: "Appointment Completed 🏁",
                     html: CONFIRMATION_TEMPLATE_DOCTOR
                         .replace("{{name}}", userData.name)
                         .replace("{{doctorName}}", appointmentData.docData.name)

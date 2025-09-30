@@ -463,9 +463,9 @@ export const CONFIRMATION_TEMPLATE_DOCTOR = `
       <h1>Hospitalo</h1>
     </div>
     <div class="content">
-      <h2>Appointment Confirmed</h2>
+      <h2>Appointment Completed</h2>
       <p>Dear {{name}},</p>
-      <p>We are pleased to inform you that your appointment has been confirmed by doctor. Here are the details:</p>
+      <p>We are pleased to inform you that your appointment has been completed by doctor. Here are the details:</p>
 
       <div class="info">
         <p><span class="icon">👨‍⚕️</span><strong>{{doctorName}}</strong></p>
