@@ -9,6 +9,7 @@ import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
 import razorpay from 'razorpay'
+import sendWithBrevo from '../utils/sendWithBrevo.js'
 
 
 const razorpayInstance = new razorpay({
@@ -560,12 +561,18 @@ const sendFeedback = async (req, res) => {
             .replace("{{message}}", message)
             .replace("{{date}}", new Date().toLocaleString());
 
-        await transporter.sendMail({
-            from: process.env.SENDER_EMAIL,
+        try {
+            await sendWithBrevo({
             to: adminTo,
             subject: "📝 New Feedback Received",
-            html
+            html,
+            senderName: 'HOSPITALO'
         });
+            
+        } catch (mailErr) {
+            console.error('Brevo API send error:', mailErr?.response?.data || mailErr.message);
+            return res.json({ success: false, message: 'Failed to send email', error: mailErr?.message });
+        }
 
         return res.json({ success: true, message: "Feedback sent successfully" });
 
