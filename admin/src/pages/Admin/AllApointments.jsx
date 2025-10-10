@@ -14,9 +14,11 @@ const AllApointments = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (aToken) getAllAppointments();
+    setLoading(false);
   }, [aToken]);
 
   const handleDeleteAppointment = async (appointmentId) => {
@@ -68,77 +70,89 @@ const AllApointments = () => {
         />
        
       </div>
-
-      <div className="bg-white border border-gray-200 rounded text-sm max-h-[80vh] min-h-[60vh] overflow-y-scroll">
-        {/* Header row with 8 columns including Delete */}
-        <div className="hidden sm:grid grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr_1fr] py-3 px-6 border-b border-gray-200 gap-2 font-medium text-gray-700">
-          <p>#</p>
-          <p>Patient</p>
-          <p>Age</p>
-          <p>Date & Time</p>
-          <p>Doctor</p>
-          <p>Fees</p>
-          <p>Actions</p>
-          <p>Delete</p>
-        </div>
-
-        {filteredAppointments.map((item, index) => (
-          <div
-            className="flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr_1fr] items-center text-gray-500 py-3 px-6 border-b border-gray-200 hover:bg-gray-50"
-            key={index}
-          >
-            <p className="max-sm:hidden">{index + 1}</p>
-
-            {/* Patient Info */}
-            <div className="flex items-center gap-2">
-              <img className="w-8 rounded-full" src={item.userData.image} alt="" />
-              <p>{item.userData.name}</p>
-            </div>
-
-            {/* Age */}
-            <p className="max-sm:hidden">{calculateAge(item.userData.dob)}</p>
-
-            {/* Date & Time */}
-            <p>
-              {slotDateFormat(item.slotDate)}, {item.slotTime}
-            </p>
-
-            {/* Doctor Info */}
-            <div className="flex items-center gap-2">
-              <img className="w-8 rounded-full bg-gray-200" src={item.docData.image} alt="" />
-              <p>{item.docData.name}</p>
-            </div>
-
-            {/* Fees */}
-            <p>
-              {currency}
-              {item.amount}
-            </p>
-
-            {/* Action Status */}
-            {item.cancelled ? (
-              <p className="text-red-400 text-xs font-medium">Cancelled</p>
-            ) : item.isCompleted ? (
-              <p className="text-green-500 text-xs font-medium">Completed</p>
-            ) : (
-              <img
-                onClick={() => cancelAppointment(item._id)}
-                className="w-10 cursor-pointer"
-                src={assets.cancel_icon}
-                alt="cancel"
-              />
-            )}
-
-            {/* Delete Button */}
-            <button
-              className="group p-2 text-[1rem] text-red-500 transition-all active:scale-95"
-              onClick={() => openModal(item._id)}
-            >
-              <FaRegTrashAlt className="text-red-600 group-hover:scale-110 transition-transform" />
-            </button>
+       
+      {
+        loading ? 
+        (
+          <div className='w-full h-[70vh] flex justify-center items-center'>
+            <div className='animate-spin rounded-full h-11 w-11 border-3 border-purple-500 border-t-transparent'></div>
           </div>
-        ))}
-      </div>
+        ) :
+        (
+          <div className="bg-white border border-gray-200 rounded text-sm max-h-[80vh] min-h-[60vh] overflow-y-scroll">
+              {/* Header row with 8 columns including Delete */}
+              <div className="hidden sm:grid grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr_1fr] py-3 px-6 border-b border-gray-200 gap-2 font-medium text-gray-700">
+                <p>#</p>
+                <p>Patient</p>
+                <p>Age</p>
+                <p>Date & Time</p>
+                <p>Doctor</p>
+                <p>Fees</p>
+                <p>Actions</p>
+                <p>Delete</p>
+              </div>
+
+              {filteredAppointments.map((item, index) => (
+                <div
+                  className="flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr_1fr] items-center text-gray-500 py-3 px-6 border-b border-gray-200 hover:bg-gray-50"
+                  key={index}
+                >
+                  <p className="max-sm:hidden">{index + 1}</p>
+
+                  {/* Patient Info */}
+                  <div className="flex items-center gap-2">
+                    <img className="w-8 rounded-full" src={item.userData.image} alt="" />
+                    <p>{item.userData.name}</p>
+                  </div>
+
+                  {/* Age */}
+                  <p className="max-sm:hidden">{calculateAge(item.userData.dob)}</p>
+
+                  {/* Date & Time */}
+                  <p>
+                    {slotDateFormat(item.slotDate)}, {item.slotTime}
+                  </p>
+
+                  {/* Doctor Info */}
+                  <div className="flex items-center gap-2">
+                    <img className="w-8 rounded-full bg-gray-200" src={item.docData.image} alt="" />
+                    <p>{item.docData.name}</p>
+                  </div>
+
+                  {/* Fees */}
+                  <p>
+                    {currency}
+                    {item.amount}
+                  </p>
+
+                  {/* Action Status */}
+                  {item.cancelled ? (
+                    <p className="text-red-400 text-xs font-medium">Cancelled</p>
+                  ) : item.isCompleted ? (
+                    <p className="text-green-500 text-xs font-medium">Completed</p>
+                  ) : (
+                    <img
+                      onClick={() => cancelAppointment(item._id)}
+                      className="w-10 cursor-pointer"
+                      src={assets.cancel_icon}
+                      alt="cancel"
+                    />
+                  )}
+
+                  {/* Delete Button */}
+                  <button
+                    className="group p-2 text-[1rem] text-red-500 transition-all active:scale-95"
+                    onClick={() => openModal(item._id)}
+                  >
+                    <FaRegTrashAlt className="text-red-600 group-hover:scale-110 transition-transform" />
+                  </button>
+                </div>
+              ))}
+            </div>
+        )
+      }
+
+      
 
       {/* Modal for Confirmation */}
       {showModal && (

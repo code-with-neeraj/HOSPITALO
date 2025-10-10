@@ -6,6 +6,7 @@ const Doctors = () => {
   const { speciality } = useParams();
   const [filterDoc, setFilterDoc] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const { doctors } = useContext(AppContext);
@@ -21,6 +22,13 @@ const Doctors = () => {
   useEffect(() => {
     applyFilter();
   }, [doctors, speciality]);
+
+   useEffect(() => {
+    // ✅ Simulate loading when doctors are being fetched
+    if (doctors && doctors.length > 0) {
+      setLoading(false);
+    }
+  }, [doctors]);
 
   return (
     <div>
@@ -116,7 +124,14 @@ const Doctors = () => {
             Gastroenterologist
           </p>
         </div>
-        <div
+
+        {
+          loading ? (
+            <div className="w-full md:h-[40vh] h-[20vh] flex justify-center items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#5f6FFF] border-t-transparent"></div>
+            </div>
+          ) : (
+            <div
           className="w-full grid gap-4 gap-y-6"
           style={{
             display: "grid",
@@ -159,6 +174,10 @@ const Doctors = () => {
             </div>
           ))}
         </div>
+          )
+        }
+
+        
       </div>
     </div>
   );

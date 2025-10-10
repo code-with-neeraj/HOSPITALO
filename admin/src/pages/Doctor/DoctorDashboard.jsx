@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { DoctorContext } from "../../context/DoctorContext";
 import { AppContext } from "../../context/AppContext";
 import { assets } from "../../assets/assets";
@@ -12,12 +12,14 @@ const DoctorDashboard = () => {
     cancelAppointment,
   } = useContext(DoctorContext);
   const { currency, slotDateFormat } = useContext(AppContext);
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (dToken) getDashData();
+    setLoading(false);
   }, [dToken]);
 
-  return (
+  return !loading ? (
     dashData && (
       <div className="m-5">
         {/* Stats cards */}
@@ -98,7 +100,11 @@ const DoctorDashboard = () => {
         </div>
       </div>
     )
-  );
+  ): (
+     <div className='w-full h-[80vh] flex justify-center items-center'>
+      <span className='w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin'></span>
+    </div>
+  )
 };
 
 export default DoctorDashboard;

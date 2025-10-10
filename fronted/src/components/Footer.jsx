@@ -141,7 +141,7 @@ const Footer = () => {
       <div>
         <hr />
         <p className="py-5 text-sm text-center">
-          Copyright © 2025 Neeraj Kumar - All Rights Reserved.
+          Copyright © 2025 Hospitalo - All Rights Reserved.
         </p>
       </div>
     </div>

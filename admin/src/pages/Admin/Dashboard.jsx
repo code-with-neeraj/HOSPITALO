@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AdminContext } from "../../context/AdminContext";
 import { AppContext } from "../../context/AppContext";
 import { assets } from "../../assets/assets";
@@ -8,12 +8,16 @@ import { NavLink } from "react-router-dom";
 const Dashboard = () => {
   const { aToken, cancelAppointment, dashData, getDashData } = useContext(AdminContext);
   const { slotDateFormat } = useContext(AppContext);
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (aToken) getDashData();
+    if (aToken){
+      getDashData();
+    } 
+    setLoading(false);
   }, [aToken]);
 
-  return (
+  return !loading ? (
     dashData && (
       <div className="m-5">
         {/* Stat Cards */}
@@ -84,7 +88,11 @@ const Dashboard = () => {
         </div>
       </div>
     )
-  );
+  ) :  (
+     <div className='w-full h-[80vh] flex justify-center items-center'>
+      <span className='w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin'></span>
+    </div>
+  )
 };
 
 export default Dashboard;

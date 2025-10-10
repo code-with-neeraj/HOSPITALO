@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { DoctorContext } from "../../context/DoctorContext";
 import { AppContext } from "../../context/AppContext";
 import { assets } from "../../assets/assets";
@@ -12,12 +12,14 @@ const DoctorAppointments = () => {
     cancelAppointment,
   } = useContext(DoctorContext);
   const { calculateAge, slotDateFormat, currency } = useContext(AppContext);
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (dToken) getAppointment();
+    setLoading(false);
   }, [dToken]);
 
-  return (
+  return !loading ? (
     <div className="w-full max-w-6xl m-5">
       <p className="mb-3 text-lg font-medium">All Appointments</p>
 
@@ -78,7 +80,11 @@ const DoctorAppointments = () => {
         ))}
       </div>
     </div>
-  );
+  ): (
+     <div className='w-full h-[80vh] flex justify-center items-center'>
+      <span className='w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin'></span>
+    </div>
+  )
 };
 
 export default DoctorAppointments;

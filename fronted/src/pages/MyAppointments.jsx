@@ -8,6 +8,7 @@ const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
   const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate();
 
   const months = [
@@ -122,10 +123,12 @@ const MyAppointments = () => {
   useEffect(() => {
     if (token) {
       getUserAppointments();
+      setLoading(false);
     }
   }, [token]);
 
-  return (
+
+  return !loading ? (
     <div>
       <p className="pb-3 mt-12 font-medium text-zinc-700 border-b">
         My appointments
@@ -189,7 +192,11 @@ const MyAppointments = () => {
         ))}
       </div>
     </div>
-  );
+  ) : (
+     <div className='w-full h-[20vh] flex justify-center items-center'>
+      <span className='w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin'></span>
+    </div>
+  )
 };
 
 export default MyAppointments;

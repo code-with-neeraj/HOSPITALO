@@ -10,6 +10,7 @@ const DoctorProfile = () => {
   const { currency } = useContext(AppContext);
 
   const [isEdit, setIsEdit] = useState(false);
+  const [loading, setLoading] = useState(true)
 
   const updateProfile = async () => {
     try {
@@ -39,9 +40,10 @@ const DoctorProfile = () => {
 
   useEffect(() => {
     if (dToken) getProfileData();
+    setLoading(false);
   }, [dToken]);
 
-  return (
+  return !loading ? (
     profileData && (
       <div>
         <div className="flex flex-col gap-4 m-5">
@@ -189,7 +191,11 @@ const DoctorProfile = () => {
         </div>
       </div>
     )
-  );
+  ): (
+     <div className='w-full h-[80vh] flex justify-center items-center'>
+      <span className='w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin'></span>
+    </div>
+  )
 };
 
 export default DoctorProfile;
