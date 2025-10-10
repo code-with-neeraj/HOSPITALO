@@ -5,28 +5,67 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const DoctorsList = () => {
-  const { doctors, aToken, getAllDoctors, changeAvailability, backendUrl } = useContext(AdminContext);
+  const { doctors = [], aToken, getAllDoctors, changeAvailability, backendUrl } = useContext(AdminContext);
   const [showModal, setShowModal] = useState(false);
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSpeciality, setFilterSpeciality] = useState("");
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
 
- 
+  // Fetch doctors (with loading)
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true);
+      // assume getAllDoctors fetches & updates context.doctors
+      await getAllDoctors();
+    } catch (err) {
+      toast.error("Failed to fetch doctors");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    if (aToken) {
+      fetchDoctors();
+    } else {
+      // if no token, stop loading to avoid spinner forever
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aToken]);
+
+  // Delete doctor with loading
   const handleDeleteDoctor = async (doctorId) => {
     try {
+      setLoading(true);
       const { data } = await axios.delete(backendUrl + `/api/admin/doctor/${doctorId}`, {
         headers: { aToken },
       });
       if (data.success) {
         toast.success("Doctor deleted successfully");
-        getAllDoctors();
+        await fetchDoctors();
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Failed to delete doctor");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to delete doctor");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Toggle availability with loading
+  const handleToggleAvailability = async (doctorId) => {
+    try {
+      setLoading(true);
+      // assume changeAvailability returns a promise and updates server
+      await changeAvailability(doctorId);
+      await fetchDoctors();
+    } catch (err) {
+      toast.error("Failed to update availability");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,19 +79,14 @@ const DoctorsList = () => {
     setSelectedDoctorId(null);
   };
 
-  // Filter doctors based on search term and speciality
-  const filteredDoctors = doctors.filter((doctor) => {
+  // Filter doctors based on search term and speciality (safe if doctors undefined)
+  const filteredDoctors = (doctors || []).filter((doctor) => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSpeciality = !filterSpeciality || doctor.speciality === filterSpeciality;
     return matchesSearch && matchesSpeciality;
   });
 
-   useEffect(() => {
-    if (aToken) getAllDoctors();
-    setLoading(false)
-  }, [aToken]);
-
-  return !loading ? (
+  return (
     <div className="m-5 max-h-[90vh] overflow-y-scroll">
       <h1 className="text-lg font-medium">All Doctors</h1>
 
@@ -70,8 +104,10 @@ const DoctorsList = () => {
           onChange={(e) => setFilterSpeciality(e.target.value)}
           className=" w-1/2  p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5f6FFF] text-sm sm:text-base"
         >
-          <option className="md:w-[30px]" value="">All Specialities</option>
-          {[...new Set(doctors.map((doc) => doc.speciality))].map((speciality, index) => (
+          <option className="md:w-[30px]" value="">
+            All Specialities
+          </option>
+          {[...new Set((doctors || []).map((doc) => doc.speciality))].map((speciality, index) => (
             <option key={index} value={speciality} className="text-sm sm:text-base ">
               {speciality}
             </option>
@@ -79,45 +115,57 @@ const DoctorsList = () => {
         </select>
       </div>
 
-      <div className="w-full flex flex-wrap gap-4 pt-5 gap-y-6">
-        {filteredDoctors.map((item, index) => (
-          <div
-            className="border border-indigo-200 rounded-xl max-w-56 overflow-hidden cursor-pointer group"
-            key={index}
-          >
-            <img
-              className="bg-indigo-50 group-hover:bg-[#5f6FFF] transition-all duration-500"
-              src={item.image}
-              alt=""
-            />
-            <div className="p-4">
-              <p className="text-neutral-800 text-lg font-medium">{item.name}</p>
-              <p className="text-zinc-600 text-sm">{item.speciality}</p>
-              <div className="mt-2 flex items-center gap-1 text-sm ">
-                <input
-                  onChange={() => changeAvailability(item._id)}
-                  type="checkbox"
-                  checked={item.available}
+      {loading ? (
+        <div className="w-full h-[80vh] flex justify-center items-center">
+          <span className="w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin"></span>
+        </div>
+      ) : (
+        <div className="w-full flex flex-wrap gap-4 pt-5 gap-y-6">
+          {filteredDoctors.length === 0 ? (
+            <p className="text-center w-full text-gray-500">No doctors found.</p>
+          ) : (
+            filteredDoctors.map((item, index) => (
+              <div
+                className="border border-indigo-200 rounded-xl max-w-56 overflow-hidden cursor-pointer group"
+                key={item._id || index}
+              >
+                <img
+                  className="bg-indigo-50 group-hover:bg-[#5f6FFF] transition-all duration-500"
+                  src={item.image}
+                  alt={item.name}
                 />
-                <p>Available</p>
-                <button
-                  className="text-[1rem] group ml-20 p-1 rounded-full bg-red-500 hover:bg-red-600 transition-all shadow-md hover:shadow-lg active:scale-95"
-                  onClick={() => openModal(item._id)}
-                >
-                  <FaRegTrashAlt className="text-white group-hover:scale-110 transition-transform" />
-                </button>
+                <div className="p-4">
+                  <p className="text-neutral-800 text-lg font-medium">{item.name}</p>
+                  <p className="text-zinc-600 text-sm">{item.speciality}</p>
+                  <div className="mt-2 flex items-center gap-1 text-sm ">
+                    <input
+                      onChange={() => handleToggleAvailability(item._id)}
+                      type="checkbox"
+                      checked={!!item.available}
+                    />
+                    <p>Available</p>
+                    <button
+                      className="text-[1rem] group ml-20 p-1 rounded-full bg-red-500 hover:bg-red-600 transition-all shadow-md hover:shadow-lg active:scale-95"
+                      onClick={() => openModal(item._id)}
+                    >
+                      <FaRegTrashAlt className="text-white group-hover:scale-110 transition-transform" />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Modal for Confirmation */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-lg transform transition-all duration-300 ease-in-out scale-100 hover:scale-[1.02]">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Confirm Deletion</h2>
-            <p className="text-gray-600 mb-6">Are you sure you want to delete this doctor? This action cannot be undone.</p>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this doctor? This action cannot be undone.
+            </p>
             <div className="flex justify-end gap-4">
               <button
                 onClick={closeModal}
@@ -139,11 +187,7 @@ const DoctorsList = () => {
         </div>
       )}
     </div>
-  ) : (
-     <div className='w-full h-[80vh] flex justify-center items-center'>
-      <span className='w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin'></span>
-    </div>
-  )
+  );
 };
 
 export default DoctorsList;

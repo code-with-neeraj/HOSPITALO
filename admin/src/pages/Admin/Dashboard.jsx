@@ -8,16 +8,55 @@ import { NavLink } from "react-router-dom";
 const Dashboard = () => {
   const { aToken, cancelAppointment, dashData, getDashData } = useContext(AdminContext);
   const { slotDateFormat } = useContext(AppContext);
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
+
+  // fetch dashboard data with loading state
+  const fetchDashData = async () => {
+    try {
+      setLoading(true);
+      // getDashData is assumed to update dashData in context
+      await getDashData();
+    } catch (err) {
+      // optional: console.error(err) or show toast
+      console.error("Failed to fetch dashboard data", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (aToken){
-      getDashData();
-    } 
-    setLoading(false);
+    if (aToken) {
+      fetchDashData();
+    } else {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aToken]);
 
-  return !loading ? (
+  // wrapper for cancelling appointment that shows loader and refetches data
+  const handleCancelAppointment = async (appointmentId) => {
+    try {
+      setLoading(true);
+      await cancelAppointment(appointmentId);
+      // refetch dashboard after successful cancel
+      await fetchDashData();
+    } catch (err) {
+      console.error("Failed to cancel appointment", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full h-[80vh] flex justify-center items-center">
+        <span className="w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin"></span>
+      </div>
+    );
+  }
+
+  // when not loading
+  return (
     dashData && (
       <div className="m-5">
         {/* Stat Cards */}
@@ -36,7 +75,6 @@ const Dashboard = () => {
               <p className="text-xl font-semibold text-gray-600">{dashData.appointments}</p>
               <p className="text-gray-400">Appointments</p>
             </div>
-            
           </div>
 
           <div className="flex items-center gap-2 bg-white p-4 min-w-52 rounded border-2 border-gray-100 cursor-pointer hover:scale-105 transition-all">
@@ -45,8 +83,10 @@ const Dashboard = () => {
               <p className="text-xl font-semibold text-gray-600">{dashData.patients}</p>
               <p className="text-gray-400">Patients</p>
             </div>
-            <NavLink className="ml-2 p-2 rounded-md bg-gray-100 text-center cursor-pointer hover:scale-110 transition-all" 
-              to={"/user-list"}>
+            <NavLink
+              className="ml-2 p-2 rounded-md bg-gray-100 text-center cursor-pointer hover:scale-110 transition-all"
+              to={"/user-list"}
+            >
               <TbListDetails className="text-2xl text-gray-600" />
             </NavLink>
           </div>
@@ -60,10 +100,10 @@ const Dashboard = () => {
           </div>
 
           <div className="pt-4 border border-gray-200 border-t-0">
-            {dashData.latestAppointments.map((item, index) => (
+            {(dashData.latestAppointments || []).map((item, index) => (
               <div
                 className="flex items-center px-6 py-3 gap-3 hover:bg-gray-100"
-                key={index}
+                key={item._id || index}
               >
                 <img className="rounded-full w-10" src={item.docData.image} alt="" />
                 <div className="flex-1 text-sm">
@@ -76,7 +116,7 @@ const Dashboard = () => {
                   <p className="text-green-500 text-xs font-medium">Completed</p>
                 ) : (
                   <img
-                    onClick={() => cancelAppointment(item._id)}
+                    onClick={() => handleCancelAppointment(item._id)}
                     className="w-10 cursor-pointer"
                     src={assets.cancel_icon}
                     alt="cancel"
@@ -88,11 +128,7 @@ const Dashboard = () => {
         </div>
       </div>
     )
-  ) :  (
-     <div className='w-full h-[80vh] flex justify-center items-center'>
-      <span className='w-12 h-12 my-1 rounded-full border-3 border-[#5f6FFF] border-t-transparent animate-spin'></span>
-    </div>
-  )
+  );
 };
 
 export default Dashboard;
