@@ -69,7 +69,7 @@ const Footer = () => {
             <li className="cursor-pointer" onClick={() => { navigate("/"); scrollTo(0,0); }}>Home</li>
             <li className="cursor-pointer" onClick={() => { navigate("/about"); scrollTo(0,0); }}>About us</li>
             <li className="cursor-pointer" onClick={() => { navigate("/contact"); scrollTo(0,0); }}>Contact us</li>
-            <li className="cursor-pointer" onClick={() => { navigate("/privacy"); scrollTo(0,0); }}>Privacy policy</li>
+            <li className="cursor-pointer" onClick={() => { navigate("/pri-policy"); scrollTo(0,0); }}>Privacy policy</li>
           </ul>
         </div>
 
@@ -78,7 +78,7 @@ const Footer = () => {
           <p className="text-xl font-medium mb-5">GET IN TOUCH</p>
           <ul className="flex flex-col gap-2 text-gray-600 mb-4">
             <li>+7277959834</li>
-            <li>neerajkr145518@gmail.com</li>
+            <li><a className="underline" href="mailto:neerajkr145518@gmail.com">neerajkr145518@gmail.com</a></li>
           </ul>
 
           <button

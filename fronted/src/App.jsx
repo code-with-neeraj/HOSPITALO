@@ -12,6 +12,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { ToastContainer } from 'react-toastify';
 import ResetPassword from './pages/ResetPassword';
+import PrivPolicy from './pages/PrivPolicy';
 
 
 const App = () => {
@@ -39,6 +40,7 @@ const App = () => {
       <Route path='/my-profile' element={<MyProfile />} />
       <Route path='/my-appointments' element={<MyAppointments />} />
       <Route path='/appointment/:docId' element={<Appointment />} />
+      <Route path='/pri-policy' element={<PrivPolicy lastUpdated="October 14, 2025" />} />
     </Routes>
     <Footer/>
    </div>
