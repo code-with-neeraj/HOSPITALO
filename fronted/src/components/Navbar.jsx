@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { assets } from "../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
+import { MdOutlineLogout } from "react-icons/md";
 import axios from "axios";
 
 const Navbar = () => {
@@ -56,11 +57,11 @@ const Navbar = () => {
       </ul>
 
       {/* ✅ Right Section (User / Buttons) */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         {token && userData ? (
           <button className="flex items-center gap-2 cursor-pointer group relative">
             <img className="w-8 rounded-full" src={userData.image} alt="user" />
-            <img className="w-2.5" src={assets.dropdown_icon} alt="dropdown" />
+            <img className="w-2.5 hidden md:block" src={assets.dropdown_icon} alt="dropdown" />
             <div className="absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-20 hidden group-hover:block">
               <div className="min-w-48 bg-gray-50 rounded flex flex-col gap-4 p-4 shadow-md">
                 <p
@@ -75,9 +76,6 @@ const Navbar = () => {
                 >
                   My Appointments
                 </p>
-                <p onClick={logout} className="hover:text-black cursor-pointer">
-                  Logout
-                </p>
               </div>
             </div>
           </button>
@@ -89,6 +87,10 @@ const Navbar = () => {
             Create account
           </button>
         )}
+
+        <div className="hover:text-black text-gray-500 hover:bg-gray-100 hover:rounded-full cursor-pointer text-2xl hidden md:block" onClick={logout}>
+          <MdOutlineLogout />
+        </div>
 
         {/* ✅ Mobile Menu Toggle */}
         <img
